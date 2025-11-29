@@ -43,7 +43,9 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Purchase Receipt" : "doctype_triggers/stock/purchase_receipt/purchase_receipt.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -137,13 +139,21 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Purchase Receipt": {
+		"before_insert": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_insert",
+		"after_insert": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.after_insert",
+		"onload": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.onload",
+		"before_validate": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_validate",
+		"validate": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.validate",
+		"on_submit": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.on_submit",
+		"on_cancel": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.on_cancel",
+		"on_update_after_submit": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.on_update_after_submit",
+		"before_save": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_save",
+		"before_cancel": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_cancel",
+		"on_update": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.on_update",
+	},
+}
 
 # Scheduled Tasks
 # ---------------

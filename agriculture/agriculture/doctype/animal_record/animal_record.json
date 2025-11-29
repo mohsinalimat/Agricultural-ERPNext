@@ -1,0 +1,238 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:tag_id",
+ "creation": "2025-11-26 22:26:54.250569",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_section",
+  "tag_id",
+  "sex",
+  "status",
+  "column_break_jcad",
+  "herd",
+  "livestock_master",
+  "source_section",
+  "animal_source",
+  "purchase_date",
+  "mother_tag",
+  "location",
+  "column_break_ohxl",
+  "breed",
+  "purchase_price",
+  "father_tag",
+  "cost_section",
+  "current_weight_kg",
+  "previous_fair_value",
+  "last_valuation_date",
+  "column_break_jahy",
+  "carrying_value",
+  "current_fair_value",
+  "cost_to_date",
+  "notes_section",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "description": "\u0631\u0642\u0645 \u0627\u0644\u0639\u0644\u0627\u0645\u0629",
+   "fieldname": "tag_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tag ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "\u0627\u0644\u0646\u0648\u0639",
+   "fieldname": "sex",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sex",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "column_break_jcad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "\u0627\u0644\u0642\u0637\u064a\u0639",
+   "fieldname": "herd",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Herd Group",
+   "options": "Herd Group",
+   "reqd": 1
+  },
+  {
+   "description": "\u0646\u0648\u0639 \u0627\u0644\u062d\u064a\u0648\u0627\u0646",
+   "fieldname": "livestock_master",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Livestock Master",
+   "link_filters": "[[\"Item\",\"custom_is_animal\",\"=\",1]]",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_section",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "description": "\u0645\u0635\u062f\u0631 \u0627\u0644\u062d\u064a\u0648\u0627\u0646",
+   "fieldname": "animal_source",
+   "fieldtype": "Select",
+   "label": "Animal Source",
+   "options": "\nInternal Birth\nPurchased",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.animal_source == \"Purchased\"",
+   "description": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0634\u0631\u0627\u0621",
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "label": "Purchase Date",
+   "mandatory_depends_on": "eval:doc.animal_source == \"Purchased\""
+  },
+  {
+   "depends_on": "eval:doc.animal_source == \"Purchased\"",
+   "description": "\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0634\u0631\u0627\u0621",
+   "fieldname": "purchase_price",
+   "fieldtype": "Currency",
+   "label": "Purchase Price",
+   "mandatory_depends_on": "eval:doc.animal_source == \"Purchased\""
+  },
+  {
+   "fieldname": "column_break_ohxl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "\u0627\u0644\u0633\u0644\u0627\u0644\u0629",
+   "fieldname": "breed",
+   "fieldtype": "Data",
+   "label": "Breed"
+  },
+  {
+   "depends_on": "eval:doc.animal_source == \"Internal Birth\"",
+   "description": "\u0643\u0648\u062f \u0627\u0644\u0623\u0645",
+   "fieldname": "mother_tag",
+   "fieldtype": "Link",
+   "label": "Mother Tag",
+   "mandatory_depends_on": "eval:doc.animal_source == \"Internal Birth\"",
+   "options": "Animal Record"
+  },
+  {
+   "depends_on": "eval:doc.animal_source == \"Internal Birth\"",
+   "description": "\u0643\u0648\u062f \u0627\u0644\u0623\u0628",
+   "fieldname": "father_tag",
+   "fieldtype": "Link",
+   "label": "Father Tag",
+   "mandatory_depends_on": "eval:doc.animal_source == \"Internal Birth\"",
+   "options": "Animal Record"
+  },
+  {
+   "description": "\u0627\u0644\u0645\u0648\u0642\u0639",
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Warehouse"
+  },
+  {
+   "description": "\u0627\u0644\u062d\u0627\u0644\u0629",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nActive\nSold\nDead"
+  },
+  {
+   "fieldname": "cost_section",
+   "fieldtype": "Section Break",
+   "label": "Cost"
+  },
+  {
+   "description": "\u0627\u0644\u0648\u0632\u0646 \u0627\u0644\u062d\u0627\u0644\u0649 (\u0643\u062c\u0645)",
+   "fieldname": "current_weight_kg",
+   "fieldtype": "Float",
+   "label": "Current Weight (kg)"
+  },
+  {
+   "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u062f\u0644\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+   "fieldname": "previous_fair_value",
+   "fieldtype": "Currency",
+   "label": "Previous Fair Value"
+  },
+  {
+   "description": "\u0622\u062e\u0631 \u062a\u0627\u0631\u064a\u062e \u062a\u0642\u064a\u064a\u0645",
+   "fieldname": "last_valuation_date",
+   "fieldtype": "Date",
+   "label": "Last Valuation Date"
+  },
+  {
+   "fieldname": "column_break_jahy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u062f\u0641\u062a\u0631\u064a\u0629",
+   "fieldname": "carrying_value",
+   "fieldtype": "Currency",
+   "label": "Carrying Value"
+  },
+  {
+   "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u062f\u0644\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629",
+   "fieldname": "current_fair_value",
+   "fieldtype": "Currency",
+   "label": "Current Fair Value"
+  },
+  {
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629",
+   "fieldname": "cost_to_date",
+   "fieldtype": "Currency",
+   "label": "Cost To Date"
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "description": "\u0627\u0644\u0645\u0644\u0627\u062d\u0638\u0627\u062a",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-28 21:45:26.870938",
+ "modified_by": "Administrator",
+ "module": "Agriculture",
+ "name": "Animal Record",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

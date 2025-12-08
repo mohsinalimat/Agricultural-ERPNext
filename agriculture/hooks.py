@@ -45,6 +45,8 @@ app_license = "mit"
 # include js in doctype views
 doctype_js = {
     "Purchase Receipt" : "doctype_triggers/stock/purchase_receipt/purchase_receipt.js",
+    "Stock Entry" : "doctype_triggers/stock/stock_entry/stock_entry.js",
+    "Sales Invoice" : "doctype_triggers/accounts/sales_invoice/sales_invoice.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -152,6 +154,32 @@ doc_events = {
 		"before_save": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_save",
 		"before_cancel": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.before_cancel",
 		"on_update": "agriculture.doctype_triggers.stock.purchase_receipt.purchase_receipt.on_update",
+	},
+	"Stock Entry": {
+		"before_insert": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.before_insert",
+		"after_insert": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.after_insert",
+		"onload": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.onload",
+		"before_validate": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.before_validate",
+		"validate": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.validate",
+		"on_submit": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.on_submit",
+		"on_cancel": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.on_cancel",
+		"on_update_after_submit": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.on_update_after_submit",
+		"before_save": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.before_save",
+		"before_cancel": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.before_cancel",
+		"on_update": "agriculture.doctype_triggers.stock.stock_entry.stock_entry.on_update",
+	},
+	"Sales Invoice": {
+		"before_insert": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.before_insert",
+		"after_insert": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.after_insert",
+		"onload": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.onload",
+		"before_validate": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.before_validate",
+		"validate": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.validate",
+		"on_submit": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.on_submit",
+		"on_cancel": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.on_cancel",
+		"on_update_after_submit": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.on_update_after_submit",
+		"before_save": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.before_save",
+		"before_cancel": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.before_cancel",
+		"on_update": "agriculture.doctype_triggers.accounts.sales_invoice.sales_invoice.on_update",
 	},
 }
 

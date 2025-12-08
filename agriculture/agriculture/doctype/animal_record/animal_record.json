@@ -24,12 +24,17 @@
   "father_tag",
   "cost_section",
   "current_weight_kg",
-  "previous_fair_value",
-  "last_valuation_date",
-  "column_break_jahy",
   "carrying_value",
   "current_fair_value",
+  "last_valuation_date",
+  "column_break_jahy",
   "cost_to_date",
+  "treatment_cost_to_date",
+  "total_cost",
+  "referances_section",
+  "birth_journal_entry",
+  "column_break_psom",
+  "dead_journal_entry",
   "notes_section",
   "notes"
  ],
@@ -133,7 +138,6 @@
    "fieldname": "father_tag",
    "fieldtype": "Link",
    "label": "Father Tag",
-   "mandatory_depends_on": "eval:doc.animal_source == \"Internal Birth\"",
    "options": "Animal Record"
   },
   {
@@ -144,11 +148,13 @@
    "options": "Warehouse"
   },
   {
+   "default": "Active",
    "description": "\u0627\u0644\u062d\u0627\u0644\u0629",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nActive\nSold\nDead"
+   "options": "Active\nSold\nDead",
+   "read_only": 1
   },
   {
    "fieldname": "cost_section",
@@ -156,16 +162,11 @@
    "label": "Cost"
   },
   {
+   "default": "0",
    "description": "\u0627\u0644\u0648\u0632\u0646 \u0627\u0644\u062d\u0627\u0644\u0649 (\u0643\u062c\u0645)",
    "fieldname": "current_weight_kg",
    "fieldtype": "Float",
    "label": "Current Weight (kg)"
-  },
-  {
-   "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u062f\u0644\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
-   "fieldname": "previous_fair_value",
-   "fieldtype": "Currency",
-   "label": "Previous Fair Value"
   },
   {
    "description": "\u0622\u062e\u0631 \u062a\u0627\u0631\u064a\u062e \u062a\u0642\u064a\u064a\u0645",
@@ -178,22 +179,25 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u062f\u0641\u062a\u0631\u064a\u0629",
    "fieldname": "carrying_value",
    "fieldtype": "Currency",
    "label": "Carrying Value"
   },
   {
+   "default": "0",
    "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u062f\u0644\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629",
    "fieldname": "current_fair_value",
    "fieldtype": "Currency",
    "label": "Current Fair Value"
   },
   {
-   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629",
+   "default": "0",
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0637\u0639\u0627\u0645)",
    "fieldname": "cost_to_date",
    "fieldtype": "Currency",
-   "label": "Cost To Date"
+   "label": "Feeding Cost To Date"
   },
   {
    "fieldname": "notes_section",
@@ -205,12 +209,56 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0637\u0639\u0627\u0645 + \u0639\u0644\u0627\u062c + \u0633\u0639\u0631 \u0627\u0644\u0634\u0631\u0627\u0621)",
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost"
+  },
+  {
+   "default": "0",
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0639\u0644\u0627\u062c)",
+   "fieldname": "treatment_cost_to_date",
+   "fieldtype": "Currency",
+   "label": "Treatment Cost To Date"
+  },
+  {
+   "fieldname": "referances_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Referances"
+  },
+  {
+   "fieldname": "birth_journal_entry",
+   "fieldtype": "Link",
+   "label": "Birth Journal Entry",
+   "options": "Journal Entry"
+  },
+  {
+   "fieldname": "column_break_psom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dead_journal_entry",
+   "fieldtype": "Link",
+   "label": "Dead Journal Entry",
+   "options": "Journal Entry"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-11-28 21:45:26.870938",
+ "links": [
+  {
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "custom_animal_record"
+  },
+  {
+   "link_doctype": "Journal Entry",
+   "link_fieldname": "custom_animal_record"
+  }
+ ],
+ "modified": "2025-12-08 22:32:15.312692",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

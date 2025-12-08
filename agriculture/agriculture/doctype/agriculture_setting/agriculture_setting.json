@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-07 20:47:30.280928",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "birth_section",
+  "birth_debit_account",
+  "column_break_xecn",
+  "birth_credit_account",
+  "sold_section",
+  "sold_debit_account",
+  "column_break_dqzs",
+  "sold_credit_account",
+  "dead_section",
+  "dead_debit_account",
+  "column_break_whji",
+  "dead_credit_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "birth_section",
+   "fieldtype": "Section Break",
+   "label": "Birth"
+  },
+  {
+   "fieldname": "birth_debit_account",
+   "fieldtype": "Link",
+   "label": "Birth Debit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_xecn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "birth_credit_account",
+   "fieldtype": "Link",
+   "label": "Birth Credit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "dead_section",
+   "fieldtype": "Section Break",
+   "label": "Dead"
+  },
+  {
+   "fieldname": "dead_debit_account",
+   "fieldtype": "Link",
+   "label": "Dead Debit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_whji",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dead_credit_account",
+   "fieldtype": "Link",
+   "label": "Dead Credit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sold_section",
+   "fieldtype": "Section Break",
+   "label": "Sold"
+  },
+  {
+   "fieldname": "sold_debit_account",
+   "fieldtype": "Link",
+   "label": "Sold Debit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_dqzs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sold_credit_account",
+   "fieldtype": "Link",
+   "label": "Sold Credit Account",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-12-07 22:53:53.107506",
+ "modified_by": "Administrator",
+ "module": "Agriculture",
+ "name": "Agriculture Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

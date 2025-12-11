@@ -7,14 +7,17 @@
  "field_order": [
   "birth_section",
   "birth_debit_account",
+  "submit_birth_journal_entry",
   "column_break_xecn",
   "birth_credit_account",
   "sold_section",
   "sold_debit_account",
+  "submit_sold_journal_entry",
   "column_break_dqzs",
   "sold_credit_account",
   "dead_section",
   "dead_debit_account",
+  "submit_dead_journal_entry",
   "column_break_whji",
   "dead_credit_account"
  ],
@@ -87,13 +90,31 @@
    "label": "Sold Credit Account",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_birth_journal_entry",
+   "fieldtype": "Check",
+   "label": "Submit Birth Journal Entry"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_sold_journal_entry",
+   "fieldtype": "Check",
+   "label": "Submit Sold Journal Entry"
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_dead_journal_entry",
+   "fieldtype": "Check",
+   "label": "Submit Dead Journal Entry"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-07 22:53:53.107506",
+ "modified": "2025-12-11 18:45:06.642182",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture Setting",

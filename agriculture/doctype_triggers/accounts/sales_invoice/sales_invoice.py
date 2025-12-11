@@ -97,8 +97,12 @@ def create_journal_entry_for_animal_records(doc):
             },
         )
 
+        # Load settings for debit/credit accounts
+        settings = frappe.get_single("Agriculture Setting")
+        
         je.insert()
-        je.submit()
+        if settings.get('submit_sold_journal_entry'):
+            je.submit()
         
         # Change Animal Record Status As Sold
         frappe.set_value("Animal Record", animal_record, 'status', "Sold")

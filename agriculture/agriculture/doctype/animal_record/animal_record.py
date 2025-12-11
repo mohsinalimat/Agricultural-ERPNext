@@ -83,11 +83,13 @@ def create_journal_entry(animal_record, entry_type, amount=0):
         debit_account = settings.get("birth_debit_account")
         credit_account = settings.get("birth_credit_account")
         amount = animal_doc.get("current_fair_value", 0) or 0
+        submit_doc = settings.get('submit_birth_journal_entry')
 
     elif entry_type == "Dead":
         debit_account = settings.get("dead_debit_account")
         credit_account = settings.get("dead_credit_account")
         amount = animal_doc.get("total_cost", 0) or 0
+        submit_doc = settings.get('submit_dead_journal_entry')
 
     else:
         return
@@ -137,7 +139,8 @@ def create_journal_entry(animal_record, entry_type, amount=0):
 
     # Save + Submit JE
     je.insert()
-    je.submit()
+    if submit_doc:
+        je.submit()
 
     # Update animal record
     if entry_type == "Birth":

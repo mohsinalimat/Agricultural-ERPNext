@@ -68,5 +68,52 @@ frappe.ui.form.on("Animal Record", {
 				__("Create")
 			);
 		}
+
+		if (!frm.is_new() && frm.doc.status === "Active") {
+			frm.add_custom_button(
+				__("Fair Value"),
+				function () {
+					let d = new frappe.ui.Dialog({
+						title: "Enter Valuation Details",
+						fields: [
+							{
+								label: "Current Weight (kg)",
+								fieldname: "current_weight",
+								fieldtype: "Float",
+								reqd: 1,
+							},
+							{
+								label: "Current Carrying Value",
+								fieldname: "carrying_value",
+								fieldtype: "Float",
+								reqd: 1,
+							},
+							{
+								label: "Valuation Date",
+								fieldname: "valuation_date",
+								fieldtype: "Date",
+								reqd: 1,
+							},
+						],
+						primary_action_label: "Submit",
+						primary_action(values) {
+							// Send data to external API
+							frappe.call({
+								method: "agriculture.agriculture.doctype.animal_record.animal_record.update_fair_value",
+								args: {
+									animal_record: frm.doc.name,
+									data: values,
+								},
+							});
+
+							d.hide(); // Close dialog
+						},
+					});
+
+					d.show();
+				},
+				__("Create")
+			);
+		}
 	},
 });

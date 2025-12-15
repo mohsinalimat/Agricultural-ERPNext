@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+import json
 
 from frappe.model.document import Document
 
@@ -65,7 +66,7 @@ def create_sales_invoice(source_name, target_doc=None):
 
 # Create a Journal Entry for Birth or Dead Animal and link it to the Animal Record.
 @frappe.whitelist()
-def create_journal_entry(animal_record, entry_type, amount=0):
+def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
     if not animal_record or not entry_type:
         frappe.throw(_("Animal Record and Entry Type are required."))
 
@@ -82,13 +83,13 @@ def create_journal_entry(animal_record, entry_type, amount=0):
     if entry_type == "Birth":
         debit_account = settings.get("birth_debit_account")
         credit_account = settings.get("birth_credit_account")
-        amount = animal_doc.get("current_fair_value", 0) or 0
+        amount = amount or animal_doc.get("current_fair_value", 0) or 0
         submit_doc = settings.get('submit_birth_journal_entry')
 
     elif entry_type == "Dead":
         debit_account = settings.get("dead_debit_account")
         credit_account = settings.get("dead_credit_account")
-        amount = animal_doc.get("total_cost", 0) or 0
+        amount = amount or animal_doc.get("total_cost", 0) or 0
         submit_doc = settings.get('submit_dead_journal_entry')
 
     else:
@@ -100,6 +101,10 @@ def create_journal_entry(animal_record, entry_type, amount=0):
             _("{0} Debit Account and {0} Credit Account must be set in Agriculture Setting.")
             .format(entry_type)
         )
+
+    if amount < 0:
+        amount *= -1
+        debit_account, credit_account = credit_account, debit_account
 
     # Validate amount
     if amount <= 0:
@@ -143,10 +148,10 @@ def create_journal_entry(animal_record, entry_type, amount=0):
         je.submit()
 
     # Update animal record
-    if entry_type == "Birth":
+    if entry_type == "Birth" and not no_link:
         frappe.set_value("Animal Record", animal_record, "birth_journal_entry", je.name)
 
-    elif entry_type == "Dead":
+    elif entry_type == "Dead" and not no_link:
         frappe.set_value("Animal Record", animal_record, "dead_journal_entry", je.name)
         frappe.set_value("Animal Record", animal_record, "status", "Dead")
 
@@ -158,3 +163,45 @@ def create_journal_entry(animal_record, entry_type, amount=0):
     )
 
     return je.name
+
+
+@frappe.whitelist()
+def update_fair_value(animal_record, data):
+    # Return immediately if no animal record is provided
+    if not animal_record:
+        return
+    
+    # If data is a string, parse it
+    if isinstance(data, str):
+        data = json.loads(data)
+
+    # Fetch the Animal Record document
+    animal_doc = frappe.get_doc("Animal Record", animal_record)
+    
+    # Extract values from data
+    current_weight = data.get('current_weight', 0) or 0
+    carrying_value = data.get('carrying_value', 0) or 0
+    new_fair_value = current_weight * carrying_value
+    valuation_date = data.get('valuation_date')
+    diff_amount = new_fair_value - (animal_doc.current_fair_value or 0)
+
+    # Append the previous values to the child table 'fair_value_details' for history
+    animal_doc.append("fair_value_details", {
+        "current_weight_kg": animal_doc.current_weight_kg,
+        "carrying_value": animal_doc.carrying_value,
+        "fair_value": animal_doc.current_fair_value,
+        "valuation_date": animal_doc.last_valuation_date,
+    })
+
+    # Update the main fields of the animal record
+    animal_doc.current_weight_kg = current_weight
+    animal_doc.carrying_value = carrying_value
+    animal_doc.current_fair_value = new_fair_value
+    animal_doc.last_valuation_date = valuation_date
+
+    # Save the document
+    animal_doc.save(ignore_permissions=True)
+    
+    # Create a journal entry for the difference in fair value
+    if diff_amount != 0:
+        create_journal_entry(animal_record, "Birth", diff_amount, 1)

@@ -97,6 +97,9 @@ def create_animal_records_for_animal_items(doc):
                 )
         
         for tag in nom_tags:    
+            item_weight = item.weight_per_unit if item.weight_per_unit else 0
+            rate = item.rate or 0
+
             # Create a new Animal record
             animal = frappe.get_doc({
                 "doctype": "Animal Record",
@@ -104,10 +107,13 @@ def create_animal_records_for_animal_items(doc):
                 "herd": item.custom_herd_group,
                 "livestock_master": item.item_code,
                 "purchase_date": doc.posting_date,
-                "purchase_price": item.rate,
+                "purchase_price": rate,
                 "animal_source": "Purchased",
+                "purchase_receipt": doc.name,
                 "location": doc.set_warehouse,
-                "current_weight_kg": item.weight_per_unit if item.weight_per_unit else 0,
+                "current_weight_kg": item_weight,
+                "carrying_value":  rate / item_weight if item_weight else rate,
+                "current_fair_value": rate,
                 "last_valuation_date": doc.posting_date,
                 "status": "Active",
             })

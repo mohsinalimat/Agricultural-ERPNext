@@ -31,12 +31,16 @@
   "cost_to_date",
   "treatment_cost_to_date",
   "total_cost",
+  "section_fair_value_datails",
+  "fair_value_details",
+  "notes_section",
+  "notes",
+  "tab_break_o32g",
   "referances_section",
   "birth_journal_entry",
+  "purchase_receipt",
   "column_break_psom",
-  "dead_journal_entry",
-  "notes_section",
-  "notes"
+  "dead_journal_entry"
  ],
  "fields": [
   {
@@ -227,12 +231,12 @@
   {
    "fieldname": "referances_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Referances"
   },
   {
    "fieldname": "birth_journal_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
+   "hidden": 1,
    "label": "Birth Journal Entry",
    "no_copy": 1,
    "options": "Journal Entry"
@@ -243,10 +247,35 @@
   },
   {
    "fieldname": "dead_journal_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
+   "hidden": 1,
    "label": "Dead Journal Entry",
    "no_copy": 1,
    "options": "Journal Entry"
+  },
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt",
+   "options": "Purchase Receipt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_fair_value_datails",
+   "fieldtype": "Section Break",
+   "label": "Fair Value Details"
+  },
+  {
+   "fieldname": "fair_value_details",
+   "fieldtype": "Table",
+   "label": "Fair Value Details",
+   "options": "Fair Value Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_break_o32g",
+   "fieldtype": "Tab Break",
+   "label": "Referances"
   }
  ],
  "grid_page_length": 50,
@@ -261,7 +290,7 @@
    "link_fieldname": "custom_animal_record"
   }
  ],
- "modified": "2025-12-11 18:58:28.657574",
+ "modified": "2025-12-15 23:42:03.282396",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

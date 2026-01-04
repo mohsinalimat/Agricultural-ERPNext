@@ -1,5 +1,7 @@
 import frappe
 
+from frappe import _
+
 from agriculture.agriculture.doctype.herd_group.herd_group import update_herd_data
 
 @frappe.whitelist()
@@ -74,6 +76,20 @@ def validate_animal_tags_for_items(doc):
 
 # Create Animal records for Animal items in the Purchase Receipt
 def create_animal_records_for_animal_items(doc):
+    # Validate total male and female With Qty
+    for item in doc.items:
+        # Check if the item is an Animal item
+        is_animal_item = frappe.db.get_value("Item", item.item_code, "custom_is_animal")
+
+        if not is_animal_item:
+            continue
+
+        no_of_male = item.custom_no_of_male or 0
+        no_of_female = item.custom_no_of_female or 0
+
+        if no_of_male + no_of_female > item.qty:
+            frappe.throw(_(f"Row {item.idx}: Number of Male + Number of Female Must be Less Than Or Equall Qty."))
+
     for item in doc.items:
         # Check if the item is an Animal item
         is_animal_item = frappe.db.get_value("Item", item.item_code, "custom_is_animal")
@@ -86,6 +102,9 @@ def create_animal_records_for_animal_items(doc):
         # Remove empty lines (if user added extra empty newline)
         nom_tags = [tag.strip() for tag in nom_tags if tag.strip()]
         
+        no_of_male = item.custom_no_of_male or 0
+        no_of_female = item.custom_no_of_female or 0
+
         for tag in nom_tags:
             # Check if an Animal with this tag already exists
             existing_animal = frappe.db.get_value("Animal Record", {"tag_id": tag})
@@ -100,11 +119,20 @@ def create_animal_records_for_animal_items(doc):
             item_weight = item.weight_per_unit if item.weight_per_unit else 0
             rate = item.rate or 0
 
+            sex = None
+            if no_of_male > 0:
+                sex = 'Male'
+                no_of_male -= 1
+            elif no_of_female:
+                sex = 'Female'
+                no_of_female -= 1
+            
             # Create a new Animal record
             animal = frappe.get_doc({
                 "doctype": "Animal Record",
                 "tag_id": tag,
                 "herd": item.custom_herd_group,
+                "sex": sex,
                 "livestock_master": item.item_code,
                 "purchase_date": doc.posting_date,
                 "purchase_price": rate,

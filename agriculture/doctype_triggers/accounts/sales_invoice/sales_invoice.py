@@ -2,6 +2,8 @@ import frappe
 
 from frappe import _
 
+from frappe.utils import get_link_to_form
+
 @frappe.whitelist()
 def before_insert(doc, method=None):
     pass
@@ -103,18 +105,30 @@ def create_journal_entry_for_animal_records(doc):
         je.insert()
         if settings.get('submit_sold_journal_entry'):
             je.submit()
-        
-        # Change Animal Record Status As Sold
-        frappe.set_value("Animal Record", animal_record, 'status', "Sold")
 
         return je.name
 
+    for row in doc.items:
+        animal_record = row.get("custom_animal_record")
+        if not animal_record:
+            continue
+
+        animal_doc = frappe.get_doc('Animal Record', animal_record)
+        if animal_doc.status != 'Active':
+            animal_link = get_link_to_form("Animal Record", animal_record)
+            frappe.throw(_(
+                "Can't Submit Sales Invoice, Animal Record {0} Isn't Active."
+            ).format(animal_link))
+
     # Loop rows
     for row in doc.items:
-        # Get Total Cost From Animal Record
-        total_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'total_cost') or 0
+        if not row.get("custom_animal_record"):
+            continue
 
-        if not row.get("custom_animal_record") or not total_cost:
+        # Get Total Cost From Animal Record
+        total_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'current_fair_value') or 0
+
+        if not total_cost:
             continue
 
         if not debit_account or not credit_account:

@@ -12,12 +12,20 @@ from frappe.model.mapper import get_mapped_doc
 from agriculture.agriculture.doctype.herd_group.herd_group import update_herd_data
 
 class AnimalRecord(Document):
+    def before_insert(self):
+        # Validate Missing Fields in the doc
+        set_missing_fields(self)
+
+
     def after_insert(self):
         # Update Herd Group data after inserting Animal Record
         update_herd_data(self.herd)
 
 
     def before_validate(self):
+        # Validate Missing Fields in the doc
+        set_missing_fields(self)
+
         # Calculte total fields 
         calculate_total(self)
 
@@ -28,6 +36,13 @@ class AnimalRecord(Document):
     def after_delete(self):
         # Update Herd Group data after deleting Animal Record
         update_herd_data(self.herd)
+
+
+# Validate Missing Fields in the doc
+def set_missing_fields(self):
+    self.breed = frappe.get_value("Item", self.livestock_master, "custom_breed")
+
+    self.current_weight_kg = self.current_weight_kg or 1
 
 
 def calculate_total(doc):
@@ -80,7 +95,7 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
     credit_account = ""
 
     # Determine accounts and amount based on entry type
-    if entry_type == "Birth":
+    if entry_type in ["Birth", "Fair Value"]:
         debit_account = settings.get("birth_debit_account")
         credit_account = settings.get("birth_credit_account")
         amount = amount or animal_doc.get("current_fair_value", 0) or 0
@@ -89,7 +104,7 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
     elif entry_type == "Dead":
         debit_account = settings.get("dead_debit_account")
         credit_account = settings.get("dead_credit_account")
-        amount = amount or animal_doc.get("total_cost", 0) or 0
+        amount = amount or animal_doc.get("current_fair_value", 0) or 0
         submit_doc = settings.get('submit_dead_journal_entry')
 
     else:
@@ -147,14 +162,6 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
     if submit_doc:
         je.submit()
 
-    # Update animal record
-    if entry_type == "Birth" and not no_link:
-        frappe.set_value("Animal Record", animal_record, "birth_journal_entry", je.name)
-
-    elif entry_type == "Dead" and not no_link:
-        frappe.set_value("Animal Record", animal_record, "dead_journal_entry", je.name)
-        frappe.set_value("Animal Record", animal_record, "status", "Dead")
-
     # Success message with link
     frappe.msgprint(
         _(
@@ -204,4 +211,4 @@ def update_fair_value(animal_record, data):
     
     # Create a journal entry for the difference in fair value
     if diff_amount != 0:
-        create_journal_entry(animal_record, "Birth", diff_amount, 1)
+        create_journal_entry(animal_record, "Fair Value", diff_amount, 1)

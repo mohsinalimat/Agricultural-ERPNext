@@ -3,11 +3,15 @@
 
 import frappe
 import json
-
-from frappe.model.document import Document
+import os
+import io
 
 from frappe import _
+from base64 import b64encode
+
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from pyqrcode import create as qr_create
 
 from agriculture.agriculture.doctype.herd_group.herd_group import update_herd_data
 
@@ -212,3 +216,71 @@ def update_fair_value(animal_record, data):
     # Create a journal entry for the difference in fair value
     if diff_amount != 0:
         create_journal_entry(animal_record, "Fair Value", diff_amount, 1)
+
+
+@frappe.whitelist()
+def create_qr_code(animal_record):
+    doc = frappe.get_doc('Animal Record', animal_record)
+
+    # Build a readable, line-separated payload instead of JSON
+    qr_lines = []
+    qr_fields = [
+        ("Name", "name"),
+        ("Sex", "sex"),
+        ("Herd", "herd"),
+        ("Status", "status"),
+        ("Livestock Master", "livestock_master"),
+        ("Animal Source", "animal_source"),
+        ("Breed", "breed"),
+    ]
+
+    if doc.animal_source == "Internal Birth":
+        qr_fields.append(("Mother Tag", "mother_tag"))
+        
+    if doc.animal_source == "Purchased":
+        qr_fields.extend([
+            ("Purchase Date", "purchase_date"),
+            ("Purchase Price", "purchase_price")
+        ])
+    
+    qr_fields.extend([
+        ("Current Fair Value", "current_fair_value"),
+        ("Total Cost", "total_cost"),
+        ("Last Valuation Date", "last_valuation_date"),
+    ])
+
+    for label, fieldname in qr_fields:
+        value = doc.name if fieldname == "name" else (doc.get_formatted(fieldname) or doc.get(fieldname))
+
+        if value in (None, "", 0):
+            continue
+        
+        qr_lines.append(f"{label}: {value or ''}")
+
+    qr_payload = "\n".join(qr_lines)
+
+    # Generate QR image
+    qr_image = io.BytesIO()
+    qr_create(qr_payload, error="L", encoding="utf-8").png(
+        qr_image,
+        scale=3,
+        quiet_zone=1
+    )
+
+    # Save The Qr File
+    filename = f"AnimalRecord-{doc.name}.png".replace(os.path.sep, "__")
+    file_doc = frappe.get_doc(
+        {
+            "doctype": "File",
+            "file_name": filename,
+            "is_private": 0,
+            "content": qr_image.getvalue(),
+            "attached_to_doctype": doc.doctype,
+            "attached_to_name": doc.name,
+        }
+    )
+
+    file_doc.save(ignore_permissions=True)
+
+    doc.qr_code = file_doc.file_url
+    doc.save(ignore_permissions=True)

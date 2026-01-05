@@ -8,6 +8,7 @@
  "field_order": [
   "details_section",
   "tag_id",
+  "qr_code",
   "sex",
   "status",
   "column_break_jcad",
@@ -276,6 +277,11 @@
    "fieldname": "tab_break_o32g",
    "fieldtype": "Tab Break",
    "label": "Referances"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Attach Image",
+   "label": "Qr Code"
   }
  ],
  "grid_page_length": 50,
@@ -290,7 +296,7 @@
    "link_fieldname": "custom_animal_record"
   }
  ],
- "modified": "2025-12-15 23:42:03.282396",
+ "modified": "2026-01-05 19:39:59.255943",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

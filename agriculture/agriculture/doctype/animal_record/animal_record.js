@@ -115,5 +115,26 @@ frappe.ui.form.on("Animal Record", {
 				__("Create")
 			);
 		}
+
+		if (!frm.is_new()) {
+			frm.add_custom_button(
+				__("Qr Code"),
+				function () {
+					frappe.call({
+						method: "agriculture.agriculture.doctype.animal_record.animal_record.create_qr_code",
+						args: {
+							animal_record: frm.doc.name,
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								frappe.msgprint(__("Qr Code Created Successfully"));
+								frm.reload_doc();
+							}
+						},
+					});
+				},
+				__("Create")
+			);
+		}
 	},
 });

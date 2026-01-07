@@ -136,5 +136,18 @@ frappe.ui.form.on("Animal Record", {
 				__("Create")
 			);
 		}
+
+		if (!frm.is_new() && frm.doc.sex != "Male") {
+			frm.add_custom_button(
+				__("Animal Birth"),
+				function () {
+					frappe.model.open_mapped_doc({
+						method: "agriculture.agriculture.doctype.animal_record.animal_record.create_animal_birth",
+						frm: frm,
+					});
+				},
+				__("Create")
+			);
+		}
 	},
 });

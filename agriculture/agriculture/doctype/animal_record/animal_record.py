@@ -218,6 +218,7 @@ def update_fair_value(animal_record, data):
         create_journal_entry(animal_record, "Fair Value", diff_amount, 1)
 
 
+# Create Qr Code Includes the data of the animal Record
 @frappe.whitelist()
 def create_qr_code(animal_record):
     doc = frappe.get_doc('Animal Record', animal_record)
@@ -284,3 +285,40 @@ def create_qr_code(animal_record):
 
     doc.qr_code = file_doc.file_url
     doc.save(ignore_permissions=True)
+
+
+# Create Animal Birth From another animal Record
+@frappe.whitelist()
+def create_animal_birth(source_name, target_doc=None):
+    animal_record = frappe.get_doc("Animal Record", source_name)
+
+    target_doc = get_mapped_doc(
+        "Animal Record",
+        source_name,
+        {
+            "Animal Record": {
+                "doctype": "Animal Record",
+            }
+        },
+        target_doc,
+    )
+
+    target_doc.animal_source = "Internal Birth"
+    target_doc.mother_tag = animal_record.name
+    target_doc.father_tag = None
+    target_doc.birth_date = frappe.utils.nowdate()
+    target_doc.status = 'Active'
+    target_doc.tag_id = None
+    target_doc.qr_code = None
+    target_doc.sex = None
+    target_doc.purchase_price = None
+    target_doc.current_weight_kg = 1
+    target_doc.carrying_value = None
+    target_doc.current_fair_value = None
+    target_doc.last_valuation_date = None
+    target_doc.cost_to_date = None
+    target_doc.treatment_cost_to_date = None
+    target_doc.total_cost = None
+    target_doc.notes = None
+
+    return target_doc

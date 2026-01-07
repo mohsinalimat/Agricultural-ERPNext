@@ -69,8 +69,11 @@ def update_animal_herd_links(doc, action='Submit'):
     # Update Links
     if animal_state == "Sold":
         frappe.set_value('Animal Record', animal_record, 'status', 'Sold' if action == 'Submit' else 'Active')
+        frappe.set_value('Animal Record', animal_record, 'sold_date', doc.posting_date if action == 'Submit' else None)
     if animal_state == 'Birth':
         frappe.set_value('Animal Record', animal_record, 'birth_journal_entry', doc.name if action == 'Submit' else None)
+        frappe.set_value('Animal Record', animal_record, 'birth_date', doc.posting_date if action == 'Submit' else None)
     if animal_state == 'Dead':
         frappe.set_value('Animal Record', animal_record, 'status', 'Dead' if action == 'Submit' else 'Active')
         frappe.set_value('Animal Record', animal_record, 'dead_journal_entry', doc.name if action == 'Submit' else None)
+        frappe.set_value('Animal Record', animal_record, 'death_date', doc.posting_date if action == 'Submit' else None)

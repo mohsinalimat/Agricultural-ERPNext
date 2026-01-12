@@ -23,6 +23,8 @@
   "purchase_cost",
   "feed_cost_to_date",
   "medicine_cost_to_date",
+  "wages_and_salaries_cost",
+  "maintenance_cost",
   "total_cost",
   "notes_section",
   "notes"
@@ -151,6 +153,18 @@
    "fieldname": "purchase_cost",
    "fieldtype": "Currency",
    "label": "Purchase Cost"
+  },
+  {
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0623\u062c\u0648\u0631)",
+   "fieldname": "wages_and_salaries_cost",
+   "fieldtype": "Currency",
+   "label": "Wages and Salaries Cost"
+  },
+  {
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0627\u0644\u0635\u064a\u0627\u0646\u0629)",
+   "fieldname": "maintenance_cost",
+   "fieldtype": "Currency",
+   "label": "Maintenance Cost"
   }
  ],
  "grid_page_length": 50,
@@ -162,7 +176,7 @@
    "link_fieldname": "herd"
   }
  ],
- "modified": "2025-12-08 21:26:57.663473",
+ "modified": "2026-01-12 23:56:51.755316",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Herd Group",

@@ -47,7 +47,8 @@ doctype_js = {
     "Purchase Receipt" : "doctype_triggers/stock/purchase_receipt/purchase_receipt.js",
     "Stock Entry" : "doctype_triggers/stock/stock_entry/stock_entry.js",
     "Sales Invoice" : "doctype_triggers/accounts/sales_invoice/sales_invoice.js",
-    "Sales Invoice" : "doctype_triggers/accounts/journal_entry/journal_entry.js",
+    "Journal Entry" : "doctype_triggers/accounts/journal_entry/journal_entry.js",
+    "GL Entry" : "doctype_triggers/accounts/gl_entry/gl_entry.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -194,6 +195,19 @@ doc_events = {
 		"before_save": "agriculture.doctype_triggers.accounts.journal_entry.journal_entry.before_save",
 		"before_cancel": "agriculture.doctype_triggers.accounts.journal_entry.journal_entry.before_cancel",
 		"on_update": "agriculture.doctype_triggers.accounts.journal_entry.journal_entry.on_update",
+	},
+	"GL Entry": {
+		"before_insert": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.before_insert",
+		"after_insert": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.after_insert",
+		"onload": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.onload",
+		"before_validate": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.before_validate",
+		"validate": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.validate",
+		"on_submit": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.on_submit",
+		"on_cancel": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.on_cancel",
+		"on_update_after_submit": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.on_update_after_submit",
+		"before_save": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.before_save",
+		"before_cancel": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.before_cancel",
+		"on_update": "agriculture.doctype_triggers.accounts.gl_entry.gl_entry.on_update",
 	},
 }
 

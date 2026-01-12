@@ -34,6 +34,8 @@
   "column_break_jahy",
   "cost_to_date",
   "treatment_cost_to_date",
+  "wages_and_salaries_cost",
+  "maintenance_cost",
   "total_cost",
   "section_fair_value_datails",
   "fair_value_details",
@@ -218,7 +220,7 @@
    "label": "Notes"
   },
   {
-   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0637\u0639\u0627\u0645 + \u0639\u0644\u0627\u062c + \u0633\u0639\u0631 \u0627\u0644\u0634\u0631\u0627\u0621)",
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629",
    "fieldname": "total_cost",
    "fieldtype": "Currency",
    "label": "Total Cost"
@@ -302,6 +304,20 @@
    "fieldname": "death_date",
    "fieldtype": "Date",
    "label": "Death Date"
+  },
+  {
+   "default": "0",
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0623\u062c\u0648\u0631)",
+   "fieldname": "wages_and_salaries_cost",
+   "fieldtype": "Currency",
+   "label": "Wages and Salaries Cost"
+  },
+  {
+   "default": "0",
+   "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0627\u0644\u0635\u064a\u0627\u0646\u0629)",
+   "fieldname": "maintenance_cost",
+   "fieldtype": "Currency",
+   "label": "Maintenance Cost"
   }
  ],
  "grid_page_length": 50,
@@ -316,7 +332,7 @@
    "link_fieldname": "custom_animal_record"
   }
  ],
- "modified": "2026-01-07 16:00:54.799322",
+ "modified": "2026-01-11 22:12:39.758384",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

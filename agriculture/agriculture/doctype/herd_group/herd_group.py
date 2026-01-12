@@ -34,6 +34,8 @@ def update_herd_data(herd_group):
             SUM(IFNULL(animal.purchase_price, 0)) AS purchase_cost,
             SUM(IFNULL(animal.cost_to_date, 0)) AS feeding_cost,
             SUM(IFNULL(animal.treatment_cost_to_date, 0)) AS treatment_cost,
+            SUM(IFNULL(animal.wages_and_salaries_cost, 0)) AS wages_and_salaries_cost,
+            SUM(IFNULL(animal.maintenance_cost, 0)) AS maintenance_cost,
             SUM(IFNULL(animal.total_cost, 0)) AS total_cost
         FROM `tabAnimal Record` AS animal
         WHERE
@@ -49,6 +51,8 @@ def update_herd_data(herd_group):
         herd_group.purchase_cost = data[0].get('purchase_cost', 0.0) or 0.0
         herd_group.feed_cost_to_date = data[0].get('feeding_cost', 0.0) or 0.0
         herd_group.medicine_cost_to_date = data[0].get('treatment_cost', 0.0) or 0.0
+        herd_group.wages_and_salaries_cost = data[0].get('wages_and_salaries_cost', 0.0) or 0.0
+        herd_group.maintenance_cost = data[0].get('maintenance_cost', 0.0) or 0.0
         herd_group.total_cost = data[0].get('total_cost', 0.0) or 0.0
 
     # Save updated herd group values

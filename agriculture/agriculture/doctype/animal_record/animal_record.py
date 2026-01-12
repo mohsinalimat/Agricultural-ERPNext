@@ -51,7 +51,10 @@ def set_missing_fields(self):
 
 def calculate_total(doc):
     doc.current_fair_value = (doc.current_weight_kg or 0) * (doc.carrying_value or 0)
-    doc.total_cost = (doc.purchase_price or 0) + (doc.cost_to_date or 0)
+    doc.total_cost = (
+        (doc.purchase_price or 0) + (doc.cost_to_date or 0) + (doc.treatment_cost_to_date or 0) + 
+        (doc.wages_and_salaries_cost or 0) + (doc.maintenance_cost) 
+    )
 
 
 @frappe.whitelist()
@@ -82,6 +85,53 @@ def create_sales_invoice(source_name, target_doc=None):
     })
 
     return target_doc
+
+
+@frappe.whitelist()
+def bulk_create_sales_invoice(animal_records):
+    if isinstance(animal_records, str):
+        animal_records = frappe.parse_json(animal_records)
+
+    if not animal_records:
+        frappe.throw(_("No Animal Records selected."))
+
+    # Use first record only to create base mapped doc
+    first_animal = frappe.get_doc("Animal Record", animal_records[0])
+
+    target_doc = get_mapped_doc(
+        "Animal Record",
+        first_animal.name,
+        {
+            "Animal Record": {
+                "doctype": "Sales Invoice",
+            }
+        },
+        None,
+    )
+
+    target_doc.due_date = frappe.utils.nowdate()
+
+    for animal_name in animal_records:
+        animal = frappe.get_doc("Animal Record", animal_name)
+
+        if animal.status != 'Active':
+            continue
+
+        if not animal.livestock_master:
+            continue
+
+        target_doc.append("items", {
+            "item_code": animal.livestock_master,
+            "item_name": frappe.get_value("Item", animal.livestock_master, "item_name"),
+            "custom_animal_record": animal.name,
+            "uom": frappe.get_value("Item", animal.livestock_master, "stock_uom"),
+            "qty": 1,
+            "rate": animal.current_fair_value,
+            "amount": animal.current_fair_value,
+        })
+
+    return target_doc
+
 
 # Create a Journal Entry for Birth or Dead Animal and link it to the Animal Record.
 @frappe.whitelist()
@@ -169,8 +219,8 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
     # Success message with link
     frappe.msgprint(
         _(
-            "Journal Entry <a href='/app/journal-entry/{0}' target='_blank'><b>{0}</b></a> has been created successfully."
-        ).format(je.name),
+            "Journal Entry <a href='/app/journal-entry/{0}' target='_blank'><b>{0}</b></a> has been created successfully for animal record <a href='/app/animal-record/{1}' target='_blank'><b>{1}</b></a>."
+        ).format(je.name, animal_record),
     )
 
     return je.name
@@ -188,6 +238,9 @@ def update_fair_value(animal_record, data):
 
     # Fetch the Animal Record document
     animal_doc = frappe.get_doc("Animal Record", animal_record)
+
+    if animal_doc.status != 'Active':
+        return
     
     # Extract values from data
     current_weight = data.get('current_weight', 0) or 0
@@ -216,6 +269,51 @@ def update_fair_value(animal_record, data):
     # Create a journal entry for the difference in fair value
     if diff_amount != 0:
         create_journal_entry(animal_record, "Fair Value", diff_amount, 1)
+
+
+@frappe.whitelist()
+def bulk_update_fair_value(animal_records, data):
+    if not animal_records:
+        return {"updated": 0, "failed": []}
+
+    if isinstance(animal_records, str):
+        animal_records = json.loads(animal_records)
+
+    if isinstance(data, str):
+        data = json.loads(data)
+
+    updated = 0
+    errors = []
+    skipped = []
+
+    for animal_record in animal_records:
+        try:
+            # Only allow bulk updates for active records to match form button behavior.
+            status = frappe.db.get_value("Animal Record", animal_record, "status")
+            if status != "Active":
+                skipped.append(animal_record)
+                continue
+
+            update_fair_value(animal_record, data)
+            updated += 1
+        except Exception:
+            # Capture per-record failures so a single error doesn't stop the batch.
+            errors.append(
+                {
+                    "animal_record": animal_record,
+                    "error": frappe.get_traceback(),
+                }
+            )
+
+    if errors:
+        # Log full tracebacks for troubleshooting without blocking the UI response.
+        frappe.log_error(
+            title="Bulk Update Fair Value Errors",
+            message=json.dumps(errors),
+        )
+
+    failed = [error.get("animal_record") for error in errors]
+    return {"updated": updated, "failed": failed, "skipped": skipped}
 
 
 # Create Qr Code Includes the data of the animal Record
@@ -322,3 +420,110 @@ def create_animal_birth(source_name, target_doc=None):
     target_doc.notes = None
 
     return target_doc
+
+
+# Calculate Salaries & Maintenance Costs For Each Animal In The Herd
+@frappe.whitelist()
+def calculate_accounting_cost(herd_group):
+    try:
+        # Get Salaries & Maintenance Accounts
+        setting = frappe.get_single("Agriculture Setting")
+
+        wages_account = setting.get("wages_and_salaries_account")
+        maintenance_account = setting.get("maintenance_account")
+
+        accounts = [a for a in [wages_account, maintenance_account] if a]
+        if not accounts:
+            return {}
+
+        # Fetch GL Entries
+        gl_entries = frappe.db.sql("""
+            SELECT
+                gl.account,
+                gl.posting_date,
+                gl.debit - gl.credit AS cost
+            FROM `tabGL Entry` gl
+            WHERE
+                gl.herd_group = %s
+                AND gl.is_cancelled = 0
+                AND gl.account IN %s
+        """, (herd_group, tuple(accounts)), as_dict=True)
+
+        # Fetch Animals
+        animal_records = frappe.db.sql("""
+            SELECT 
+                name,
+                status,
+                sold_date,
+                death_date
+            FROM `tabAnimal Record`
+            WHERE herd = %s
+        """, (herd_group,), as_dict=True)
+
+        # Initialize result dict
+        animal_dict = {}
+        for ar in animal_records:
+            animal_dict[ar.name] = {
+                "wages_and_salaries_cost": 0,
+                "maintenance_cost": 0
+            }
+
+        # Helper: check if animal is applicable for a GL date
+        def is_applicable(animal, posting_date):
+            if animal.status == "Active":
+                return True
+            if animal.status == "Dead" and animal.death_date:
+                return posting_date <= animal.death_date
+            if animal.status == "Sold" and animal.sold_date:
+                return posting_date <= animal.sold_date
+            return True
+
+        # Process GL Entries
+        for gl in gl_entries:
+            applicable_animals = [
+                ar for ar in animal_records
+                if is_applicable(ar, gl.posting_date)
+            ]
+
+            if not applicable_animals:
+                continue
+
+            cost_per_animal = (gl.cost or 0) / len(applicable_animals)
+
+            for ar in applicable_animals:
+                if gl.account == wages_account:
+                    animal_dict[ar.name]["wages_and_salaries_cost"] += cost_per_animal
+                elif gl.account == maintenance_account:
+                    animal_dict[ar.name]["maintenance_cost"] += cost_per_animal
+
+        
+        # Update ALL Animal Records (even if cost = 0)
+        for ar in animal_records:
+            animal_name = ar.name
+            costs = animal_dict.get(animal_name, {
+                "wages_and_salaries_cost": 0,
+                "maintenance_cost": 0
+            })
+
+            animal_doc = frappe.get_doc("Animal Record", animal_name)
+
+            if (
+                animal_doc.wages_and_salaries_cost != (costs["wages_and_salaries_cost"] or 0) or
+                animal_doc.maintenance_cost != (costs["maintenance_cost"] or 0)
+            ):
+                animal_doc.wages_and_salaries_cost = costs["wages_and_salaries_cost"] or 0
+                animal_doc.maintenance_cost = costs["maintenance_cost"] or 0
+
+                animal_doc.save(ignore_permissions=True)
+
+        frappe.db.commit()
+        
+        return animal_dict
+
+    except Exception:
+        # Log Error But Do Not Block GL Creation
+        frappe.log_error(
+            frappe.get_traceback(),
+            "Calculate Accounting Cost Failed"
+        )
+        return {}

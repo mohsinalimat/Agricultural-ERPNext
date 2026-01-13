@@ -308,3 +308,4 @@ doc_events = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+after_migrate = "agriculture.setup.after_migrate.after_migrate"

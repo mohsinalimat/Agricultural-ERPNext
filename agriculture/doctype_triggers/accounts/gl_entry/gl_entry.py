@@ -37,6 +37,8 @@ def before_save(doc, method=None):
 @frappe.whitelist()
 def before_cancel(doc, method=None):
     pass
+
 @frappe.whitelist()
 def on_update(doc, method=None):
-    pass
+    if doc.herd_group:
+        calculate_accounting_cost(doc.herd_group)

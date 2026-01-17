@@ -17,7 +17,10 @@ from agriculture.agriculture.doctype.herd_group.herd_group import update_herd_da
 
 class AnimalRecord(Document):
     def before_insert(self):
-        # Validate Missing Fields in the doc
+        # Throw Error If There are Missing Fields in the doc
+        validate_missing_fields(self)
+
+        # Set Missing Fields in the doc
         set_missing_fields(self)
 
 
@@ -25,8 +28,14 @@ class AnimalRecord(Document):
         # Update Herd Group data after inserting Animal Record
         update_herd_data(self.herd)
 
+        if self.animal_source == 'Internal Birth':
+            create_journal_entry(self.name, 'Birth')
+
 
     def before_validate(self):
+        # Throw Error If There are Missing Fields in the doc
+        validate_missing_fields(self)
+        
         # Validate Missing Fields in the doc
         set_missing_fields(self)
 
@@ -40,6 +49,12 @@ class AnimalRecord(Document):
     def after_delete(self):
         # Update Herd Group data after deleting Animal Record
         update_herd_data(self.herd)
+
+
+# Throw Error If There are Missing Fields in the doc
+def validate_missing_fields(self):
+    if self.animal_source == 'Internal Birth' and not self.purchase_price:
+        frappe.throw("Missing Field: 'Purchase Price'")        
 
 
 # Validate Missing Fields in the doc
@@ -150,17 +165,17 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
 
     # Determine accounts and amount based on entry type
     if entry_type in ["Birth", "Fair Value"]:
+        amount_field = "current_fair_value" if entry_type == "Birth" else "purchase_price"
+
         debit_account = settings.get("birth_debit_account")
         credit_account = settings.get("birth_credit_account")
-        amount = amount or animal_doc.get("current_fair_value", 0) or 0
+        amount = amount or (animal_doc.get(amount_field, 0) or 0)
         submit_doc = settings.get('submit_birth_journal_entry')
-
     elif entry_type == "Dead":
         debit_account = settings.get("dead_debit_account")
         credit_account = settings.get("dead_credit_account")
         amount = amount or animal_doc.get("current_fair_value", 0) or 0
         submit_doc = settings.get('submit_dead_journal_entry')
-
     else:
         return
 

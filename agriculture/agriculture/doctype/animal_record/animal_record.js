@@ -9,16 +9,16 @@ frappe.ui.form.on("Animal Record", {
 						frm: frm,
 					});
 				},
-				__("Create")
+				__("Create"),
 			);
 		}
 
 		if (!frm.is_new() && frm.doc.status == "Active") {
 			let options = [];
 
-			if (frm.doc.animal_source == "Internal Birth" && !frm.doc.birth_journal_entry) {
-				options.push({ label: "Birth Entry", value: "Birth" });
-			}
+			// if (frm.doc.animal_source == "Internal Birth" && !frm.doc.birth_journal_entry) {
+			// 	options.push({ label: "Birth Entry", value: "Birth" });
+			// }
 			if (!frm.doc.dead_journal_entry) {
 				options.push({ label: "Dead Entry", value: "Dead" });
 			}
@@ -65,7 +65,7 @@ frappe.ui.form.on("Animal Record", {
 
 					d.show();
 				},
-				__("Create")
+				__("Create"),
 			);
 		}
 
@@ -112,7 +112,7 @@ frappe.ui.form.on("Animal Record", {
 
 					d.show();
 				},
-				__("Create")
+				__("Create"),
 			);
 		}
 
@@ -133,7 +133,7 @@ frappe.ui.form.on("Animal Record", {
 						},
 					});
 				},
-				__("Create")
+				__("Create"),
 			);
 		}
 
@@ -146,7 +146,7 @@ frappe.ui.form.on("Animal Record", {
 						frm: frm,
 					});
 				},
-				__("Create")
+				__("Create"),
 			);
 		}
 	},

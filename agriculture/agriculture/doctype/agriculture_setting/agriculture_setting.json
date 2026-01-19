@@ -12,9 +12,11 @@
   "birth_credit_account",
   "sold_section",
   "sold_debit_account",
+  "sold_debit_account_secondary",
   "submit_sold_journal_entry",
   "column_break_dqzs",
   "sold_credit_account",
+  "sold_credit_account_secondary",
   "dead_section",
   "dead_debit_account",
   "submit_dead_journal_entry",
@@ -80,7 +82,7 @@
   {
    "fieldname": "sold_debit_account",
    "fieldtype": "Link",
-   "label": "Sold Debit Account",
+   "label": "Sold Debit Account (Default)",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   },
@@ -91,7 +93,7 @@
   {
    "fieldname": "sold_credit_account",
    "fieldtype": "Link",
-   "label": "Sold Credit Account",
+   "label": "Sold Credit Account (Default)",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   },
@@ -133,13 +135,26 @@
    "fieldtype": "Link",
    "label": "Maintenance Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "sold_debit_account_secondary",
+   "fieldtype": "Link",
+   "label": "Sold Debit Account (Secondary)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sold_credit_account_secondary",
+   "fieldtype": "Link",
+   "label": "Sold Credit Account (Secondary)",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-11 22:09:50.357334",
+ "modified": "2026-01-19 18:36:03.383779",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture Setting",

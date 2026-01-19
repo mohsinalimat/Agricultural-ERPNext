@@ -64,8 +64,10 @@ def create_journal_entry_for_animal_records(doc):
 
     debit_account  = settings.get("sold_debit_account")
     credit_account = settings.get("sold_credit_account")
+    debit_account_secondary  = settings.get("sold_debit_account_secondary")
+    credit_account_secondary = settings.get("sold_credit_account_secondary")
 
-    def create_journal_entry(animal_record, total_cost):
+    def create_journal_entry(animal_record, total_cost, total_cost2):
         # Create Journal Entry
         je = frappe.get_doc({
             "doctype": "Journal Entry",
@@ -99,6 +101,29 @@ def create_journal_entry_for_animal_records(doc):
             },
         )
 
+        if total_cost2 != 0:
+            je.append(
+                "accounts",
+                {
+                    "account": debit_account_secondary,
+                    "debit": abs(total_cost2) if total_cost2 > 0 else 0,
+                    "debit_in_account_currency": abs(total_cost2) if total_cost2 > 0 else 0,
+                    "credit": abs(total_cost2) if total_cost2 < 0 else 0,
+                    "credit_in_account_currency": abs(total_cost2) if total_cost2 < 0 else 0,
+                },
+            )
+
+            je.append(
+                "accounts",
+                {
+                    "account": credit_account_secondary,
+                    "debit": abs(total_cost2) if total_cost2 < 0 else 0,
+                    "debit_in_account_currency": abs(total_cost2) if total_cost2 < 0 else 0,
+                    "credit": abs(total_cost2) if total_cost2 > 0 else 0,
+                    "credit_in_account_currency": abs(total_cost2) if total_cost2 > 0 else 0,
+                },
+            )
+
         # Load settings for debit/credit accounts
         settings = frappe.get_single("Agriculture Setting")
         
@@ -127,6 +152,7 @@ def create_journal_entry_for_animal_records(doc):
 
         # Get Total Cost From Animal Record
         total_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'current_fair_value') or 0
+        total_cost2 = frappe.get_value("Animal Record", row.custom_animal_record, 'total_cost') or 0
 
         if not total_cost:
             continue
@@ -136,13 +162,13 @@ def create_journal_entry_for_animal_records(doc):
                 _("Sold Debit Account and Sold Credit Account are Required in Agriculture Setting to Create Journal Entry.")
             )
 
-        je_name = create_journal_entry(row.custom_animal_record, total_cost)
+        je_name = create_journal_entry(row.custom_animal_record, total_cost, total_cost2)
         
         frappe.db.set_value("Sales Invoice Item", row.name, "custom_journal_entry", je_name)
 
 def cancel_journal_entry_for_animal_records(doc):
     for row in doc.items:
-        if row.custom_journal_entry:
+        if row.custom_journal_entry and frappe.db.exists("Journal Entry", row.custom_journal_entry):
             je = frappe.get_doc("Journal Entry", row.custom_journal_entry)
             if je.docstatus == 1:
                 je.cancel()

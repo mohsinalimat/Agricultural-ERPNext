@@ -29,7 +29,7 @@ class AnimalRecord(Document):
         update_herd_data(self.herd)
 
         if self.animal_source == 'Internal Birth':
-            create_journal_entry(self.name, 'Birth')
+            create_journal_entry(self.name, 'Birth', self.purchase_price)
 
 
     def before_validate(self):
@@ -45,6 +45,9 @@ class AnimalRecord(Document):
         # Update Herd Group data after inserting Animal Record
         update_herd_data(self.herd)
 
+    def on_update(self):
+        # Validate Missing Fields in the doc
+        set_missing_fields(self)
 
     def after_delete(self):
         # Update Herd Group data after deleting Animal Record
@@ -54,7 +57,7 @@ class AnimalRecord(Document):
 # Throw Error If There are Missing Fields in the doc
 def validate_missing_fields(self):
     if self.animal_source == 'Internal Birth' and not self.purchase_price:
-        frappe.throw("Missing Field: 'Purchase Price'")        
+        frappe.throw("Missing Field: 'Purchase Price'")
 
 
 # Validate Missing Fields in the doc
@@ -62,6 +65,9 @@ def set_missing_fields(self):
     self.breed = frappe.get_value("Item", self.livestock_master, "custom_breed")
 
     self.current_weight_kg = self.current_weight_kg or 1
+
+    if self.animal_source == 'Internal Birth' and self.mother_tag:
+        update_number_of_children(self.mother_tag)
 
 
 def calculate_total(doc):
@@ -542,3 +548,22 @@ def calculate_accounting_cost(herd_group):
             "Calculate Accounting Cost Failed"
         )
         return {}
+
+# Update Number of Children
+@frappe.whitelist()
+def update_number_of_children(animal):
+    try:
+        if not frappe.db.exists("Animal Record", animal):
+            return
+
+        no_of_children = frappe.db.sql("""
+            SELECT COUNT(*) AS count
+            FROM `tabAnimal Record` ar
+            WHERE mother_tag = %s
+        """, (animal), as_dict=True)
+
+        no_of_children = no_of_children[0].get('count') if no_of_children else 0
+
+        frappe.set_value("Animal Record", animal, 'number_of_children', no_of_children)
+    except Exception:
+        frappe.log_erro(f"Error In Update Number Of Children for Animal {animal}")

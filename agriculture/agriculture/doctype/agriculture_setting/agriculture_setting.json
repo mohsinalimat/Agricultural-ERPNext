@@ -12,11 +12,12 @@
   "birth_credit_account",
   "sold_section",
   "sold_debit_account",
-  "sold_debit_account_secondary",
   "submit_sold_journal_entry",
   "column_break_dqzs",
   "sold_credit_account",
-  "sold_credit_account_secondary",
+  "sold_credit_account_feeding",
+  "sold_credit_account_wages_and_salaries",
+  "sold_credit_account_maintenance",
   "dead_section",
   "dead_debit_account",
   "submit_dead_journal_entry",
@@ -82,7 +83,7 @@
   {
    "fieldname": "sold_debit_account",
    "fieldtype": "Link",
-   "label": "Sold Debit Account (Default)",
+   "label": "Sold Debit Account",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   },
@@ -93,7 +94,7 @@
   {
    "fieldname": "sold_credit_account",
    "fieldtype": "Link",
-   "label": "Sold Credit Account (Default)",
+   "label": "Sold Credit Account (Purchase)",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   },
@@ -137,15 +138,23 @@
    "options": "Account"
   },
   {
-   "fieldname": "sold_debit_account_secondary",
+   "fieldname": "sold_credit_account_feeding",
    "fieldtype": "Link",
-   "label": "Sold Debit Account (Secondary)",
+   "label": "Sold Credit Account (Feeding + Treatment)",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   },
   {
-   "fieldname": "sold_credit_account_secondary",
+   "fieldname": "sold_credit_account_wages_and_salaries",
    "fieldtype": "Link",
-   "label": "Sold Credit Account (Secondary)",
+   "label": "Sold Credit Account (Wages and Salaries)",
+   "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sold_credit_account_maintenance",
+   "fieldtype": "Link",
+   "label": "Sold Credit Account (Maintenance)",
    "link_filters": "[[\"Account\",\"is_group\",\"=\",0]]",
    "options": "Account"
   }
@@ -154,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-01-19 18:36:03.383779",
+ "modified": "2026-01-22 21:50:54.449483",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture Setting",

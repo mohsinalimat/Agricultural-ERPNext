@@ -26,6 +26,7 @@
   "purchase_price",
   "father_tag",
   "location",
+  "number_of_children",
   "cost_section",
   "current_weight_kg",
   "carrying_value",
@@ -119,7 +120,8 @@
    "description": "\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0634\u0631\u0627\u0621",
    "fieldname": "purchase_price",
    "fieldtype": "Currency",
-   "label": "Purchase Price"
+   "label": "Purchase Price",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_ohxl",
@@ -175,13 +177,15 @@
    "description": "\u0627\u0644\u0648\u0632\u0646 \u0627\u0644\u062d\u0627\u0644\u0649 (\u0643\u062c\u0645)",
    "fieldname": "current_weight_kg",
    "fieldtype": "Float",
-   "label": "Current Weight (kg)"
+   "label": "Current Weight (kg)",
+   "no_copy": 1
   },
   {
    "description": "\u0622\u062e\u0631 \u062a\u0627\u0631\u064a\u062e \u062a\u0642\u064a\u064a\u0645",
    "fieldname": "last_valuation_date",
    "fieldtype": "Date",
-   "label": "Last Valuation Date"
+   "label": "Last Valuation Date",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_jahy",
@@ -192,21 +196,24 @@
    "description": "\u0627\u0644\u0633\u0639\u0631 (\u0643\u062c\u0645)",
    "fieldname": "carrying_value",
    "fieldtype": "Currency",
-   "label": "Carrying Value"
+   "label": "Carrying Value",
+   "no_copy": 1
   },
   {
    "default": "0",
    "description": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0639\u0627\u062f\u0644\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629",
    "fieldname": "current_fair_value",
    "fieldtype": "Currency",
-   "label": "Current Fair Value"
+   "label": "Current Fair Value",
+   "no_copy": 1
   },
   {
    "default": "0",
    "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0637\u0639\u0627\u0645)",
    "fieldname": "cost_to_date",
    "fieldtype": "Currency",
-   "label": "Feeding Cost To Date"
+   "label": "Feeding Cost To Date",
+   "no_copy": 1
   },
   {
    "fieldname": "notes_section",
@@ -223,14 +230,16 @@
    "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629",
    "fieldname": "total_cost",
    "fieldtype": "Currency",
-   "label": "Total Cost"
+   "label": "Total Cost",
+   "no_copy": 1
   },
   {
    "default": "0",
    "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0639\u0644\u0627\u062c)",
    "fieldname": "treatment_cost_to_date",
    "fieldtype": "Currency",
-   "label": "Treatment Cost To Date"
+   "label": "Treatment Cost To Date",
+   "no_copy": 1
   },
   {
    "fieldname": "referances_section",
@@ -310,14 +319,22 @@
    "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0623\u062c\u0648\u0631)",
    "fieldname": "wages_and_salaries_cost",
    "fieldtype": "Currency",
-   "label": "Wages and Salaries Cost"
+   "label": "Wages and Salaries Cost",
+   "no_copy": 1
   },
   {
    "default": "0",
    "description": "\u0625\u062c\u0645\u0627\u0644\u0649 \u0627\u0644\u062a\u0643\u0644\u0641\u0629 (\u0627\u0644\u0635\u064a\u0627\u0646\u0629)",
    "fieldname": "maintenance_cost",
    "fieldtype": "Currency",
-   "label": "Maintenance Cost"
+   "label": "Maintenance Cost",
+   "no_copy": 1
+  },
+  {
+   "description": "\u0639\u062f\u062f \u0627\u0644\u0645\u0648\u0627\u0644\u064a\u062f",
+   "fieldname": "number_of_children",
+   "fieldtype": "Int",
+   "label": "Number Of Children"
   }
  ],
  "grid_page_length": 50,
@@ -332,7 +349,7 @@
    "link_fieldname": "custom_animal_record"
   }
  ],
- "modified": "2026-01-11 22:12:39.758384",
+ "modified": "2026-01-22 21:00:12.057896",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

@@ -63,11 +63,32 @@ def create_journal_entry_for_animal_records(doc):
     settings = frappe.get_single("Agriculture Setting")
 
     debit_account  = settings.get("sold_debit_account")
-    credit_account = settings.get("sold_credit_account")
-    debit_account_secondary  = settings.get("sold_debit_account_secondary")
-    credit_account_secondary = settings.get("sold_credit_account_secondary")
+    purchase_account = settings.get("sold_credit_account")
+    feeding_account  = settings.get("sold_credit_account_feeding")
+    wages_account  = settings.get("sold_credit_account_wages_and_salaries")
+    maintenance_account  = settings.get("sold_credit_account_maintenance")
 
-    def create_journal_entry(animal_record, total_cost, total_cost2):
+    def create_journal_entry(
+        animal_record, 
+        total_cost,
+        purchase_cost,
+        feeding_cost,
+        wages_cost,
+        maintenance_cost
+    ):
+        if total_cost == 0:
+            return
+
+        if (
+            (total_cost != 0 and not debit_account) or
+            (purchase_cost != 0 and not purchase_account) or
+            (feeding_cost != 0 and not feeding_account) or
+            (wages_cost != 0 and not wages_account) or
+            (maintenance_cost != 0 and not maintenance_account)    
+        ):
+            frappe.throw("Please add selling accounts in agriculture setting.")
+
+
         # Create Journal Entry
         je = frappe.get_doc({
             "doctype": "Journal Entry",
@@ -83,44 +104,58 @@ def create_journal_entry_for_animal_records(doc):
             "accounts",
             {
                 "account": debit_account,
-                "debit": total_cost,
-                "debit_in_account_currency": total_cost,
-                "credit": 0,
-                "credit_in_account_currency": 0,
+                "debit": abs(total_cost) if total_cost > 0 else 0,
+                "debit_in_account_currency": abs(total_cost) if total_cost > 0 else 0,
+                "credit": abs(total_cost) if total_cost < 0 else 0,
+                "credit_in_account_currency": abs(total_cost) if total_cost < 0 else 0,
             },
         )
 
-        je.append(
-            "accounts",
-            {
-                "account": credit_account,
-                "debit": 0,
-                "debit_in_account_currency": 0,
-                "credit": total_cost,
-                "credit_in_account_currency": total_cost,
-            },
-        )
-
-        if total_cost2 != 0:
+        if purchase_cost != 0:
             je.append(
                 "accounts",
                 {
-                    "account": debit_account_secondary,
-                    "debit": abs(total_cost2) if total_cost2 > 0 else 0,
-                    "debit_in_account_currency": abs(total_cost2) if total_cost2 > 0 else 0,
-                    "credit": abs(total_cost2) if total_cost2 < 0 else 0,
-                    "credit_in_account_currency": abs(total_cost2) if total_cost2 < 0 else 0,
+                    "account": purchase_account,
+                    "debit": 0,
+                    "debit_in_account_currency": 0,
+                    "credit": purchase_cost,
+                    "credit_in_account_currency": purchase_cost,
                 },
             )
 
+        if feeding_cost != 0:
             je.append(
                 "accounts",
                 {
-                    "account": credit_account_secondary,
-                    "debit": abs(total_cost2) if total_cost2 < 0 else 0,
-                    "debit_in_account_currency": abs(total_cost2) if total_cost2 < 0 else 0,
-                    "credit": abs(total_cost2) if total_cost2 > 0 else 0,
-                    "credit_in_account_currency": abs(total_cost2) if total_cost2 > 0 else 0,
+                    "account": feeding_account,
+                    "debit": 0,
+                    "debit_in_account_currency": 0,
+                    "credit": feeding_cost,
+                    "credit_in_account_currency": feeding_cost,
+                },
+            )
+
+        if wages_cost != 0:
+            je.append(
+                "accounts",
+                {
+                    "account": wages_account,
+                    "debit": abs(wages_cost) if wages_cost < 0 else 0,
+                    "debit_in_account_currency": abs(wages_cost) if wages_cost < 0 else 0,
+                    "credit": abs(wages_cost) if wages_cost > 0 else 0,
+                    "credit_in_account_currency": abs(wages_cost) if wages_cost > 0 else 0,
+                },
+            )
+        
+        if maintenance_cost != 0:
+            je.append(
+                "accounts",
+                {
+                    "account": maintenance_account,
+                    "debit": abs(maintenance_cost) if maintenance_cost < 0 else 0,
+                    "debit_in_account_currency": abs(maintenance_cost) if maintenance_cost < 0 else 0,
+                    "credit": abs(maintenance_cost) if maintenance_cost > 0 else 0,
+                    "credit_in_account_currency": abs(maintenance_cost) if maintenance_cost > 0 else 0,
                 },
             )
 
@@ -151,18 +186,24 @@ def create_journal_entry_for_animal_records(doc):
             continue
 
         # Get Total Cost From Animal Record
-        total_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'current_fair_value') or 0
-        total_cost2 = frappe.get_value("Animal Record", row.custom_animal_record, 'total_cost') or 0
+        total_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'total_cost') or 0
+        purchase_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'purchase_price') or 0
+        feeding_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'cost_to_date') or 0
+        treatment_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'treatment_cost_to_date') or 0
+        wages_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'wages_and_salaries_cost') or 0
+        maintenance_cost = frappe.get_value("Animal Record", row.custom_animal_record, 'maintenance_cost') or 0
 
         if not total_cost:
             continue
 
-        if not debit_account or not credit_account:
-            frappe.throw(
-                _("Sold Debit Account and Sold Credit Account are Required in Agriculture Setting to Create Journal Entry.")
-            )
-
-        je_name = create_journal_entry(row.custom_animal_record, total_cost, total_cost2)
+        je_name = create_journal_entry(
+            row.custom_animal_record, 
+            total_cost, 
+            purchase_cost,
+            feeding_cost + treatment_cost,
+            wages_cost,
+            maintenance_cost
+        )
         
         frappe.db.set_value("Sales Invoice Item", row.name, "custom_journal_entry", je_name)
 

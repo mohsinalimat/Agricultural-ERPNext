@@ -42,12 +42,12 @@ class AnimalRecord(Document):
         # Calculte total fields 
         calculate_total(self)
 
-        # Update Herd Group data after inserting Animal Record
-        update_herd_data(self.herd)
-
     def on_update(self):
         # Validate Missing Fields in the doc
         set_missing_fields(self)
+
+        # Update Herd Group data after inserting Animal Record
+        update_herd_data(self.herd)
 
     def after_delete(self):
         # Update Herd Group data after deleting Animal Record
@@ -532,12 +532,15 @@ def calculate_accounting_cost(herd_group):
                 animal_doc.wages_and_salaries_cost != (costs["wages_and_salaries_cost"] or 0) or
                 animal_doc.maintenance_cost != (costs["maintenance_cost"] or 0)
             ):
-                animal_doc.wages_and_salaries_cost = costs["wages_and_salaries_cost"] or 0
-                animal_doc.maintenance_cost = costs["maintenance_cost"] or 0
-
-                animal_doc.save(ignore_permissions=True)
-
-        frappe.db.commit()
+                frappe.db.set_value(
+                    "Animal Record",
+                    animal_name,
+                    {
+                        "wages_and_salaries_cost": costs["wages_and_salaries_cost"] or 0,
+                        "maintenance_cost": costs["maintenance_cost"] or 0,
+                    },
+                    update_modified=False
+                )
         
         return animal_dict
 

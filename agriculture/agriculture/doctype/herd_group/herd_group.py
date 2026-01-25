@@ -14,7 +14,13 @@ class HerdGroup(Document):
 
 def calculate_total(doc):
     doc.total_fair_value = (doc.total_weight_kg or 0) * (doc.carrying_value or 0)
-    doc.total_cost = (doc.purchase_cost or 0) + (doc.medicine_cost_to_date or 0) + (doc.feed_cost_to_date or 0)
+    doc.total_cost = (
+        (doc.purchase_cost or 0) + 
+        (doc.medicine_cost_to_date or 0) + 
+        (doc.feed_cost_to_date or 0) + 
+        (doc.wages_and_salaries_cost or 0) + 
+        (doc.maintenance_cost or 0)
+    )
 
 
 @frappe.whitelist()

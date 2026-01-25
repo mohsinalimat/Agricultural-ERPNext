@@ -178,10 +178,7 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
         amount = amount or (animal_doc.get(amount_field, 0) or 0)
         submit_doc = settings.get('submit_birth_journal_entry')
     elif entry_type == "Dead":
-        debit_account = settings.get("dead_debit_account")
-        credit_account = settings.get("dead_credit_account")
-        amount = amount or animal_doc.get("current_fair_value", 0) or 0
-        submit_doc = settings.get('submit_dead_journal_entry')
+        return create_journal_entry_for_dead_animal_records(animal_doc)
     else:
         return
 
@@ -243,6 +240,117 @@ def create_journal_entry(animal_record, entry_type, amount=0, no_link=0):
             "Journal Entry <a href='/app/journal-entry/{0}' target='_blank'><b>{0}</b></a> has been created successfully for animal record <a href='/app/animal-record/{1}' target='_blank'><b>{1}</b></a>."
         ).format(je.name, animal_record),
     )
+
+    return je.name
+
+
+def create_journal_entry_for_dead_animal_records(doc):
+    # Get accounts from Agriculture Settings
+    settings = frappe.get_single("Agriculture Setting")
+
+    debit_account  = settings.get("dead_debit_account")
+    purchase_account = settings.get("dead_credit_account")
+    feeding_account  = settings.get("dead_credit_account_feeding")
+    wages_account  = settings.get("dead_credit_account_wages_and_salaries")
+    maintenance_account  = settings.get("dead_credit_account_maintenance")
+
+    # Get Total Cost From Animal Record
+    total_cost = doc.total_cost or 0
+    purchase_cost = doc.purchase_price or 0
+    feeding_cost = doc.cost_to_date or 0
+    treatment_cost = doc.treatment_cost_to_date or 0
+    wages_cost = doc.wages_and_salaries_cost or 0
+    maintenance_cost = doc.maintenance_cost or 0 
+
+    if total_cost == 0:
+        return
+
+    if (
+        (total_cost != 0 and not debit_account) or
+        (purchase_cost != 0 and not purchase_account) or
+        ((feeding_cost + treatment_cost) != 0 and not feeding_account) or
+        (wages_cost != 0 and not wages_account) or
+        (maintenance_cost != 0 and not maintenance_account)    
+    ):
+        frappe.throw("Please add dead accounts in agriculture setting.")
+
+
+    # Create Journal Entry
+    je = frappe.get_doc({
+        "doctype": "Journal Entry",
+        "voucher_type": "Journal Entry",
+        "company": frappe.defaults.get_user_default("Company"),
+        "custom_animal_state": "Dead",
+        "custom_animal_record": doc.name,
+        "posting_date": frappe.utils.nowdate(),
+        "user_remark": _("Auto-created for Animal Record: {0}").format(doc.name),
+    })
+
+    je.append(
+        "accounts",
+        {
+            "account": debit_account,
+            "debit": abs(total_cost) if total_cost > 0 else 0,
+            "debit_in_account_currency": abs(total_cost) if total_cost > 0 else 0,
+            "credit": abs(total_cost) if total_cost < 0 else 0,
+            "credit_in_account_currency": abs(total_cost) if total_cost < 0 else 0,
+        },
+    )
+
+    if purchase_cost != 0:
+        je.append(
+            "accounts",
+            {
+                "account": purchase_account,
+                "debit": 0,
+                "debit_in_account_currency": 0,
+                "credit": purchase_cost,
+                "credit_in_account_currency": purchase_cost,
+            },
+        )
+
+    if (feeding_cost + treatment_cost) != 0:
+        je.append(
+            "accounts",
+            {
+                "account": feeding_account,
+                "debit": 0,
+                "debit_in_account_currency": 0,
+                "credit": (feeding_cost + treatment_cost),
+                "credit_in_account_currency": (feeding_cost + treatment_cost),
+            },
+        )
+
+    if wages_cost != 0:
+        je.append(
+            "accounts",
+            {
+                "account": wages_account,
+                "debit": abs(wages_cost) if wages_cost < 0 else 0,
+                "debit_in_account_currency": abs(wages_cost) if wages_cost < 0 else 0,
+                "credit": abs(wages_cost) if wages_cost > 0 else 0,
+                "credit_in_account_currency": abs(wages_cost) if wages_cost > 0 else 0,
+            },
+        )
+    
+    if maintenance_cost != 0:
+        je.append(
+            "accounts",
+            {
+                "account": maintenance_account,
+                "debit": abs(maintenance_cost) if maintenance_cost < 0 else 0,
+                "debit_in_account_currency": abs(maintenance_cost) if maintenance_cost < 0 else 0,
+                "credit": abs(maintenance_cost) if maintenance_cost > 0 else 0,
+                "credit_in_account_currency": abs(maintenance_cost) if maintenance_cost > 0 else 0,
+            },
+        )
+
+    # Load settings for debit/credit accounts
+    settings = frappe.get_single("Agriculture Setting")
+    
+    je.insert()
+    if settings.get('submit_sold_journal_entry'):
+        je.submit()
 
     return je.name
 
@@ -517,7 +625,14 @@ def calculate_accounting_cost(herd_group):
                 elif gl.account == maintenance_account:
                     animal_dict[ar.name]["maintenance_cost"] += cost_per_animal
 
-        
+        totals = {
+            "purchase_cost": 0,
+            "feeding_cost": 0,
+            "treatment_cost": 0,
+            "wages_and_salaries_cost": 0,
+            "maintenance_cost": 0,
+        }
+
         # Update ALL Animal Records (even if cost = 0)
         for ar in animal_records:
             animal_name = ar.name
@@ -527,6 +642,12 @@ def calculate_accounting_cost(herd_group):
             })
 
             animal_doc = frappe.get_doc("Animal Record", animal_name)
+
+            totals["purchase_cost"] += animal_doc.purchase_price or 0
+            totals["feeding_cost"] += animal_doc.cost_to_date or 0
+            totals["treatment_cost"] += animal_doc.treatment_cost_to_date or 0
+            totals["wages_and_salaries_cost"] += costs["wages_and_salaries_cost"] or 0
+            totals["maintenance_cost"] += costs["maintenance_cost"] or 0
 
             if (
                 animal_doc.wages_and_salaries_cost != (costs["wages_and_salaries_cost"] or 0) or
@@ -538,10 +659,27 @@ def calculate_accounting_cost(herd_group):
                     {
                         "wages_and_salaries_cost": costs["wages_and_salaries_cost"] or 0,
                         "maintenance_cost": costs["maintenance_cost"] or 0,
+                        "total_cost": (
+                            (animal_doc.purchase_price or 0) +
+                            (animal_doc.cost_to_date or 0) +
+                            (animal_doc.treatment_cost_to_date or 0) +
+                            (costs["wages_and_salaries_cost"] or 0) +
+                            (costs["maintenance_cost"] or 0)
+                        )
                     },
                     update_modified=False
                 )
-        
+
+        # Update Herd Group Totals
+        herd_group = frappe.get_doc("Herd Group", herd_group)
+        herd_group.purchase_cost = totals["purchase_cost"]
+        herd_group.feed_cost_to_date = totals["feeding_cost"]
+        herd_group.medicine_cost_to_date = totals["treatment_cost"]
+        herd_group.wages_and_salaries_cost = totals["wages_and_salaries_cost"]
+        herd_group.maintenance_cost = totals["maintenance_cost"]
+        herd_group.total_cost = totals["purchase_cost"] + totals["feeding_cost"] + totals["treatment_cost"] + totals["wages_and_salaries_cost"] + totals["maintenance_cost"]
+        herd_group.save(ignore_permissions=True)
+        frappe.msgprint(str(totals))
         return animal_dict
 
     except Exception:

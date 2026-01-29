@@ -40,6 +40,8 @@
   "total_cost",
   "section_fair_value_datails",
   "fair_value_details",
+  "animal_children_section",
+  "children",
   "notes_section",
   "notes",
   "tab_break_o32g",
@@ -335,6 +337,17 @@
    "fieldname": "number_of_children",
    "fieldtype": "Int",
    "label": "Number Of Children"
+  },
+  {
+   "fieldname": "animal_children_section",
+   "fieldtype": "Section Break",
+   "label": "Animal Children"
+  },
+  {
+   "fieldname": "children",
+   "fieldtype": "Table",
+   "label": "Children",
+   "options": "Animal Children"
   }
  ],
  "grid_page_length": 50,
@@ -349,7 +362,7 @@
    "link_fieldname": "custom_animal_record"
   }
  ],
- "modified": "2026-01-22 21:00:12.057896",
+ "modified": "2026-01-29 20:24:26.304017",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Animal Record",

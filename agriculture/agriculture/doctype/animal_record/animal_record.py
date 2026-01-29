@@ -71,12 +71,27 @@ def set_missing_fields(self):
 
 
 def calculate_total(doc):
+    def r2(val):
+        return round(val or 0, 2)
+    
+    # Update Current Fair Value
     doc.current_fair_value = (doc.current_weight_kg or 0) * (doc.carrying_value or 0)
-    doc.total_cost = (
-        (doc.purchase_price or 0) + (doc.cost_to_date or 0) + (doc.treatment_cost_to_date or 0) + 
-        (doc.wages_and_salaries_cost or 0) + (doc.maintenance_cost) 
-    )
 
+    # Round Costs
+    doc.purchase_price = r2(doc.purchase_price)
+    doc.cost_to_date = r2(doc.cost_to_date)
+    doc.treatment_cost_to_date = r2(doc.treatment_cost_to_date)
+    doc.wages_and_salaries_cost = r2(doc.wages_and_salaries_cost)
+    doc.maintenance_cost = r2(doc.maintenance_cost)
+
+    doc.total_cost = r2(    
+        doc.purchase_price
+        + doc.cost_to_date
+        + doc.treatment_cost_to_date
+        + doc.wages_and_salaries_cost
+        + doc.maintenance_cost
+    )
+    
 
 @frappe.whitelist()
 def create_sales_invoice(source_name, target_doc=None):
@@ -255,12 +270,21 @@ def create_journal_entry_for_dead_animal_records(doc):
     maintenance_account  = settings.get("dead_credit_account_maintenance")
 
     # Get Total Cost From Animal Record
-    total_cost = doc.total_cost or 0
-    purchase_cost = doc.purchase_price or 0
-    feeding_cost = doc.cost_to_date or 0
-    treatment_cost = doc.treatment_cost_to_date or 0
-    wages_cost = doc.wages_and_salaries_cost or 0
-    maintenance_cost = doc.maintenance_cost or 0 
+    def r2(val):
+        return round(val or 0, 2)
+
+    purchase_cost = r2(doc.purchase_price)
+    feeding_cost = r2(doc.cost_to_date)
+    treatment_cost = r2(doc.treatment_cost_to_date)
+    wages_cost = r2(doc.wages_and_salaries_cost)
+    maintenance_cost = r2(doc.maintenance_cost)
+    total_cost = r2(
+        purchase_cost
+        + feeding_cost
+        + treatment_cost
+        + wages_cost
+        + maintenance_cost
+    )
 
     if total_cost == 0:
         return
@@ -698,13 +722,20 @@ def update_number_of_children(animal):
             return
 
         no_of_children = frappe.db.sql("""
-            SELECT COUNT(*) AS count
+            SELECT name
             FROM `tabAnimal Record` ar
             WHERE mother_tag = %s
         """, (animal), as_dict=True)
 
-        no_of_children = no_of_children[0].get('count') if no_of_children else 0
+        mother_doc = frappe.get_doc("Animal Record", animal)
+        mother_doc.number_of_children = len(no_of_children) if no_of_children else 0
+        mother_doc.children = []
 
-        frappe.set_value("Animal Record", animal, 'number_of_children', no_of_children)
+        for child in no_of_children:
+            mother_doc.append("children", {
+                "animal": child.name
+            })
+
+        mother_doc.save(ignore_permissions=True)
     except Exception:
-        frappe.log_erro(f"Error In Update Number Of Children for Animal {animal}")
+        frappe.log_error(f"Error In Update Number Of Children for Animal {animal}")

@@ -46,6 +46,7 @@ def before_cancel(doc, method=None):
 def on_update(doc, method=None):
     pass
 
+
 def validate_required_fields(doc):
     # Check all Animal Records for Animal Items
     for row in doc.items:
@@ -76,6 +77,18 @@ def create_journal_entry_for_animal_records(doc):
         wages_cost,
         maintenance_cost
     ):
+        purchase_cost = round(purchase_cost or 0, 2)
+        feeding_cost = round(feeding_cost or 0, 2)
+        wages_cost = round(wages_cost or 0, 2)
+        maintenance_cost = round(maintenance_cost or 0, 2)
+
+        total_cost = round(
+            purchase_cost
+            + feeding_cost
+            + wages_cost
+            + maintenance_cost
+        , 2)
+
         if total_cost == 0:
             return
 
@@ -206,6 +219,7 @@ def create_journal_entry_for_animal_records(doc):
         )
         
         frappe.db.set_value("Sales Invoice Item", row.name, "custom_journal_entry", je_name)
+
 
 def cancel_journal_entry_for_animal_records(doc):
     for row in doc.items:

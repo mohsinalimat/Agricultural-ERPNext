@@ -51,15 +51,23 @@ def update_herd_data(herd_group):
 
     # Update herd group fields with new totals
     if data:
-        herd_group.current_heads_number = data[0].get('current_heads_number', 0) or 0
-        herd_group.total_weight_kg = data[0].get('total_weight_kg', 0.0) or 0.0
-        herd_group.average_weight = data[0].get('average_weight', 0.0) or 0.0
-        herd_group.purchase_cost = data[0].get('purchase_cost', 0.0) or 0.0
-        herd_group.feed_cost_to_date = data[0].get('feeding_cost', 0.0) or 0.0
-        herd_group.medicine_cost_to_date = data[0].get('treatment_cost', 0.0) or 0.0
-        herd_group.wages_and_salaries_cost = data[0].get('wages_and_salaries_cost', 0.0) or 0.0
-        herd_group.maintenance_cost = data[0].get('maintenance_cost', 0.0) or 0.0
-        herd_group.total_cost = data[0].get('total_cost', 0.0) or 0.0
+        row = data[0] if data else {}
+
+        herd_group.current_heads_number = round(row.get('current_heads_number', 0) or 0, 2)
+        herd_group.total_weight_kg = round(row.get('total_weight_kg', 0.0) or 0.0, 2)
+        herd_group.average_weight = round(row.get('average_weight', 0.0) or 0.0, 2)
+        herd_group.purchase_cost = round(row.get('purchase_cost', 0.0) or 0.0, 2)
+        herd_group.feed_cost_to_date = round(row.get('feeding_cost', 0.0) or 0.0, 2)
+        herd_group.medicine_cost_to_date = round(row.get('treatment_cost', 0.0) or 0.0, 2)
+        herd_group.wages_and_salaries_cost = round(row.get('wages_and_salaries_cost', 0.0) or 0.0, 2)
+        herd_group.maintenance_cost = round(row.get('maintenance_cost', 0.0) or 0.0, 2)
+        herd_group.total_cost = round(
+                                        herd_group.purchase_cost +
+                                        herd_group.feed_cost_to_date +
+                                        herd_group.medicine_cost_to_date +
+                                        herd_group.wages_and_salaries_cost +
+                                        herd_group.maintenance_cost, 2
+                                    )
 
     # Save updated herd group values
     herd_group.save(ignore_permissions=True)

@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-11 00:09:22.623056",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_pnk0",
+  "amended_from",
+  "land",
+  "seed",
+  "seed_name",
+  "uom",
+  "column_break_uqyn",
+  "company",
+  "cycle_number",
+  "cycle_start_date",
+  "cycle_end_date",
+  "costs_section",
+  "seed_cost",
+  "maintenance_cost",
+  "wages_cost",
+  "other_expenses",
+  "column_break_uqdv",
+  "cycle_direct_cost",
+  "total_cycle_cost"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_pnk0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Land Cycle",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "land",
+   "fieldtype": "Link",
+   "label": "Land",
+   "options": "Agricultural Land"
+  },
+  {
+   "fieldname": "seed",
+   "fieldtype": "Link",
+   "label": "Seed",
+   "options": "Item"
+  },
+  {
+   "fieldname": "seed_name",
+   "fieldtype": "Data",
+   "label": "Seed Name"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_uqyn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "cycle_number",
+   "fieldtype": "Int",
+   "label": "Cycle Number"
+  },
+  {
+   "fieldname": "cycle_start_date",
+   "fieldtype": "Date",
+   "label": "Cycle Start Date"
+  },
+  {
+   "fieldname": "cycle_end_date",
+   "fieldtype": "Date",
+   "label": "Cycle End Date"
+  },
+  {
+   "fieldname": "costs_section",
+   "fieldtype": "Section Break",
+   "label": "Costs"
+  },
+  {
+   "fieldname": "seed_cost",
+   "fieldtype": "Currency",
+   "label": "Seed Cost"
+  },
+  {
+   "fieldname": "maintenance_cost",
+   "fieldtype": "Currency",
+   "label": "Maintenance Cost"
+  },
+  {
+   "fieldname": "wages_cost",
+   "fieldtype": "Currency",
+   "label": "Wages Cost"
+  },
+  {
+   "fieldname": "other_expenses",
+   "fieldtype": "Currency",
+   "label": "Other Expenses"
+  },
+  {
+   "fieldname": "column_break_uqdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cycle_direct_cost",
+   "fieldtype": "Currency",
+   "label": "Cycle Direct Cost"
+  },
+  {
+   "fieldname": "total_cycle_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cycle Cost"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-02-11 00:15:45.165623",
+ "modified_by": "Administrator",
+ "module": "Agriculture",
+ "name": "Land Cycle",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

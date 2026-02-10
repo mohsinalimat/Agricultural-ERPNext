@@ -1,0 +1,206 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:land_code",
+ "creation": "2026-02-10 23:08:43.670852",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_section",
+  "land_code",
+  "land_name",
+  "purchase_date",
+  "status",
+  "column_break_grjr",
+  "company",
+  "irrigation_type",
+  "area",
+  "products_planned_section",
+  "products",
+  "seed_details_section",
+  "current_seed",
+  "seed_name",
+  "uom",
+  "column_break_exib",
+  "total_number_of_cycles",
+  "total_of_cycles_completed",
+  "number_of_cycles_remaining",
+  "seed_cost",
+  "seed_cost_per_cycle",
+  "remaining_cost",
+  "crop_cycles_section",
+  "cycles"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "land_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Land Code",
+   "no_copy": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "land_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Land Name",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Purchase Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active"
+  },
+  {
+   "fieldname": "column_break_grjr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "irrigation_type",
+   "fieldtype": "Link",
+   "label": "Irrigation Type",
+   "options": "Irrigation Type"
+  },
+  {
+   "description": "\u0627\u0644\u0645\u0633\u0627\u062d\u0629 \u0628\u0627\u0644\u0641\u062f\u0627\u0646",
+   "fieldname": "area",
+   "fieldtype": "Float",
+   "label": "Area"
+  },
+  {
+   "fieldname": "products_planned_section",
+   "fieldtype": "Section Break",
+   "label": "Products Planned"
+  },
+  {
+   "fieldname": "products",
+   "fieldtype": "Table",
+   "label": "Products",
+   "options": "Products Planned"
+  },
+  {
+   "fieldname": "total_number_of_cycles",
+   "fieldtype": "Int",
+   "label": "Total Number Of Cycles"
+  },
+  {
+   "fieldname": "total_of_cycles_completed",
+   "fieldtype": "Int",
+   "label": "Total of Cycles Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_cycles_remaining",
+   "fieldtype": "Int",
+   "label": "Number of Cycles Remaining",
+   "read_only": 1
+  },
+  {
+   "fieldname": "seed_details_section",
+   "fieldtype": "Section Break",
+   "label": "Seed Details"
+  },
+  {
+   "fieldname": "current_seed",
+   "fieldtype": "Link",
+   "label": "Seed",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "current_seed.item_name",
+   "fieldname": "seed_name",
+   "fieldtype": "Data",
+   "label": "Seed Name"
+  },
+  {
+   "fetch_from": "current_seed.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_exib",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "seed_cost",
+   "fieldtype": "Currency",
+   "label": "Seed Cost"
+  },
+  {
+   "fieldname": "seed_cost_per_cycle",
+   "fieldtype": "Currency",
+   "label": "Seed Cost Per Cycle"
+  },
+  {
+   "fieldname": "remaining_cost",
+   "fieldtype": "Currency",
+   "label": "Remaining Cost"
+  },
+  {
+   "fieldname": "crop_cycles_section",
+   "fieldtype": "Section Break",
+   "label": "Crop Cycles"
+  },
+  {
+   "fieldname": "cycles",
+   "fieldtype": "Table",
+   "label": "Cycles",
+   "options": "Crop Cycles",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-02-10 23:56:13.614844",
+ "modified_by": "Administrator",
+ "module": "Agriculture",
+ "name": "Agricultural Land",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,8 +1,8 @@
 import frappe
 
 from frappe import _
-
-from agriculture.agriculture.doctype.herd_group.herd_group import update_herd_data
+from datetime import datetime
+from agriculture.agriculture.doctype.herd_group.herd_group import get_active_range
 
 @frappe.whitelist()
 def before_insert(doc, method=None):
@@ -22,12 +22,12 @@ def validate(doc, method=None):
 
 @frappe.whitelist()
 def on_submit(doc, method=None):
-    # Update Costs in Animal Records if stock entry typr in ["Feeding Entry", "Treatment Entry"]
+    # Update Costs in Animal Records if stock entry type in ["Feeding Entry", "Treatment Entry"]
     update_animal_totals(doc)
 
 @frappe.whitelist()
 def on_cancel(doc, method=None):
-    # Update Costs in Animal Records if stock entry typr in ["Feeding Entry", "Treatment Entry"]
+    # Update Costs in Animal Records if stock entry type in ["Feeding Entry", "Treatment Entry"]
     update_animal_totals(doc, 1)
 
 @frappe.whitelist()
@@ -45,6 +45,10 @@ def on_update(doc, method=None):
 
 
 def update_animal_totals(doc, is_cancel=0):
+    posting_date = doc.posting_date
+    if isinstance(posting_date, str):
+        posting_date = datetime.strptime(posting_date, "%Y-%m-%d").date()
+        
     # Only run for Feeding or Treatment entries
     if doc.stock_entry_type not in ['Feeding Entry', 'Treatment Entry']:
         return
@@ -62,89 +66,106 @@ def update_animal_totals(doc, is_cancel=0):
         herd_group = row.get('custom_herd_group')
         animal_record = row.get('custom_animal_record')
         amount = (row.get('amount', 0) or 0) * (-1 if is_cancel else 1)
-
+        
         # Update animal or herd totals based on the row
         if animal_record:
             update_totals_for_animal(animal_record, amount, doc.stock_entry_type)
         else:
-            update_totals_for_herd(herd_group, amount, doc.stock_entry_type)
+            update_totals_for_herd(herd_group, amount, doc.stock_entry_type, posting_date)
 
 
 def update_totals_for_animal(animal_record, amount, se_type):
-    # Fetch animal record document
+    # Fetch animal doc to get the herd
     animal_doc = frappe.get_doc("Animal Record", animal_record)
+    herd_group = animal_doc.herd
 
-    # Recalculate feeding and treatment costs
-    purchase_price = animal_doc.purchase_price or 0
-    feeding_cost_to_date = (animal_doc.cost_to_date or 0) + (amount if se_type == 'Feeding Entry' else 0)
-    treatment_cost_to_date = (animal_doc.treatment_cost_to_date or 0) + (amount if se_type == 'Treatment Entry' else 0)
-    total_cost = purchase_price + feeding_cost_to_date + treatment_cost_to_date
+    feeding_cost = amount if se_type == "Feeding Entry" else 0
+    treatment_cost = amount if se_type == "Treatment Entry" else 0
+    total_cost = feeding_cost + treatment_cost
 
-    # Update DB directly for performance
+    # Update animal totals
     frappe.db.sql("""
         UPDATE `tabAnimal Record`
         SET 
-            purchase_price = %s,
-            cost_to_date = %s,
-            treatment_cost_to_date = %s,
-            total_cost = %s
+            cost_to_date = IFNULL(cost_to_date,0) + %s, 
+            treatment_cost_to_date = IFNULL(treatment_cost_to_date,0) + %s,
+            total_cost = IFNULL(total_cost,0) + %s
         WHERE name = %s
-    """, (purchase_price, feeding_cost_to_date, treatment_cost_to_date, total_cost, animal_record))
+    """, (feeding_cost, treatment_cost, total_cost, animal_record))
+
+    # Update herd totals
+    frappe.db.sql("""
+        UPDATE `tabHerd Group`
+        SET 
+            feed_cost_to_date = IFNULL(feed_cost_to_date,0) + %s, 
+            medicine_cost_to_date = IFNULL(medicine_cost_to_date,0) + %s,
+            total_cost = IFNULL(total_cost,0) + %s
+        WHERE name = %s
+    """, (feeding_cost, treatment_cost, total_cost, herd_group))
+
     frappe.db.commit()
 
-    # Refresh herd totals based on this animal
-    update_herd_data(animal_doc.herd)
 
+def update_totals_for_herd(herd_group, amount, se_type, posting_date):
+    # Fetch all animals in this herd
+    animals = frappe.get_all(
+        "Animal Record",
+        filters={"herd": herd_group},
+        fields=[
+            "name", "status", "death_date", "sold_date",
+            "animal_source", "birth_date", "purchase_date",
+            "purchase_price", "wages_and_salaries_cost", "maintenance_cost",
+            "cost_to_date", "treatment_cost_to_date"
+        ]
+    )
 
-def update_totals_for_herd(herd_group, amount, se_type):
-    # Get list of active animals in this herd
-    animals = frappe.db.sql("""
-        SELECT 
-            name, 
-            purchase_price, 
-            cost_to_date, 
-            treatment_cost_to_date
-        FROM `tabAnimal Record`
-        WHERE 
-            herd = %s 
-            AND status = 'Active'
-    """, (herd_group,), as_dict=True)
+    # Determine which animals are active at the posting_date
+    active_animals = []
+    for ani in animals:
+        from_date, to_date = get_active_range(ani)
+        if from_date <= posting_date <= to_date:
+            active_animals.append(ani)
 
-    if not animals:
-        frappe.throw(_("No active animals found in Herd Group '{0}'.".format(herd_group)))
+    if not active_animals:
+        return
 
-    # Cost per animal (split evenly among all herd animals)
-    count = len(animals)
-    per_animal_amount = (amount or 0) / count if count else 0
+    # Split amount evenly among active animals
+    per_animal_amount = (amount or 0) / len(active_animals)
 
-    # Build bulk update data
-    for animal in animals:
-        purchase_price = animal.purchase_price or 0
-        
-        # Increase feeding or treatment cost
-        feeding_cost = animal.cost_to_date or 0
-        treatment_cost = animal.treatment_cost_to_date or 0
-        
+    total_feeding = 0
+    total_treatment = 0
+
+    for ani in active_animals:
+        feeding_cost = ani.cost_to_date or 0
+        treatment_cost = ani.treatment_cost_to_date or 0
+
         if se_type == "Feeding Entry":
             feeding_cost += per_animal_amount
+            total_feeding += per_animal_amount
         elif se_type == "Treatment Entry":
             treatment_cost += per_animal_amount
+            total_treatment += per_animal_amount
 
-        total_cost = purchase_price + feeding_cost + treatment_cost
+        total_cost = (ani.purchase_price or 0) + feeding_cost + treatment_cost + (ani.wages_and_salaries_cost or 0) + (ani.maintenance_cost or 0)
 
-        # Update Totals For Animal
+        # Update each animal
         frappe.db.sql("""
             UPDATE `tabAnimal Record`
             SET 
-                purchase_price = %s,
                 cost_to_date = %s,
                 treatment_cost_to_date = %s,
                 total_cost = %s
             WHERE name = %s
-        """, (purchase_price, feeding_cost, treatment_cost, total_cost, animal.name))
+        """, (feeding_cost, treatment_cost, total_cost, ani.name))
 
-    # Commit Cchanges To Database
+    # Update herd totals
+    frappe.db.sql("""
+        UPDATE `tabHerd Group`
+        SET 
+            feed_cost_to_date = IFNULL(feed_cost_to_date,0) + %s,
+            medicine_cost_to_date = IFNULL(medicine_cost_to_date,0) + %s,
+            total_cost = IFNULL(total_cost,0) + %s
+        WHERE name = %s
+    """, (total_feeding, total_treatment, total_feeding + total_treatment, herd_group))
+
     frappe.db.commit()
-
-    # Update totals for herd group
-    update_herd_data(herd_group)

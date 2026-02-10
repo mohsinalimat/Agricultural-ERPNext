@@ -108,6 +108,10 @@ def create_sales_invoice(source_name, target_doc=None):
         target_doc,
     )
 
+    project = None
+    if frappe.db.exists("Project", {"project_name": "الاغنام"}):
+        project = frappe.get_value("Project", {"project_name": "الاغنام"}, "name")
+
     target_doc.due_date = frappe.utils.nowdate()
 
     target_doc.append("items", {
@@ -118,6 +122,7 @@ def create_sales_invoice(source_name, target_doc=None):
         "qty": 1,
         "rate": animal_record.current_fair_value,
         "amount": animal_record.current_fair_value,
+        "project": project,
     })
 
     return target_doc
@@ -147,6 +152,10 @@ def bulk_create_sales_invoice(animal_records):
 
     target_doc.due_date = frappe.utils.nowdate()
 
+    project = None
+    if frappe.db.exists("Project", {"project_name": "الاغنام"}):
+        project = frappe.get_value("Project", {"project_name": "الاغنام"}, "name")
+
     for animal_name in animal_records:
         animal = frappe.get_doc("Animal Record", animal_name)
 
@@ -164,6 +173,7 @@ def bulk_create_sales_invoice(animal_records):
             "qty": 1,
             "rate": animal.current_fair_value,
             "amount": animal.current_fair_value,
+            "project": project,
         })
 
     return target_doc
@@ -623,13 +633,17 @@ def calculate_accounting_cost(herd_group):
 
         # Helper: check if animal is applicable for a GL date
         def is_applicable(animal, posting_date):
-            if animal.status == "Active":
-                return True
-            if animal.status == "Dead" and animal.death_date:
-                return posting_date <= animal.death_date
-            if animal.status == "Sold" and animal.sold_date:
-                return posting_date <= animal.sold_date
-            return True
+            applicable = True
+            if animal.status == "Dead" and animal.death_date and animal.death_date < posting_date:
+                applicable = False
+            if animal.status == "Sold" and animal.sold_date and animal.sold_date < posting_date:
+                applicable = False
+            if animal.animal_source == 'Internal Birth' and animal.birth_date and animal.birth_date > posting_date:
+                applicable = False
+            if animal.animal_source == 'Purchased' and animal.purchase_date and animal.purchase_date > posting_date:
+                applicable = False
+
+            return applicable
 
         # Process GL Entries
         for gl in gl_entries:
@@ -703,7 +717,7 @@ def calculate_accounting_cost(herd_group):
         herd_group.maintenance_cost = totals["maintenance_cost"]
         herd_group.total_cost = totals["purchase_cost"] + totals["feeding_cost"] + totals["treatment_cost"] + totals["wages_and_salaries_cost"] + totals["maintenance_cost"]
         herd_group.save(ignore_permissions=True)
-        frappe.msgprint(str(totals))
+
         return animal_dict
 
     except Exception:

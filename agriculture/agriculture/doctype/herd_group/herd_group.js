@@ -7,6 +7,10 @@ frappe.ui.form.on("Herd Group", {
 					args: { herd_group: frm.doc.name },
 				});
 				frappe.call({
+					method: "agriculture.agriculture.doctype.herd_group.herd_group.update_feeding_and_treatment_cost",
+					args: { herd_group: frm.doc.name },
+				});
+				frappe.call({
 					method: "agriculture.agriculture.doctype.herd_group.herd_group.update_herd_data",
 					args: { herd_group: frm.doc.name },
 					callback: function (r) {
